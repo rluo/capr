@@ -1,6 +1,6 @@
-# capp
+# capa
 
-R package for implementing the algorithms in the CAP [paper](https://doi.org/10.1093/biostatistics/kxz057)
+R package for implementing the algorithms in the CAP [paper](https://doi.org/10.1093/biostatistics/kxz057) using [Armadillo](https://arma.sourceforge.net/).
 
 
 
@@ -13,5 +13,5 @@ Package skeleton:
 
 Add Rcpp support:
 
-    usethis::use_rcpp("capp")
+    usethis::use_rcpp("capa")
     usethis::use_package("RcppArmadillo", type = "LinkingTo")

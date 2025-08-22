@@ -33,8 +33,8 @@ RUN Rscript -e 'options(repos=c(CRAN="https://cloud.r-project.org"), Ncpus=paral
     "styler","lintr","devtools" \
     ), dependencies=TRUE)'
 
-RUN git config --global user.email "xi.rossi.luo@gmail.com" && 
-      git config --global user.name "Xi (Rossi) LUO"
+RUN git config --global user.email "xi.rossi.luo@gmail.com" && \
+    git config --global user.name "Xi (Rossi) LUO"
 
 # 3) Default workdir (mount your project here in VS Code)
 WORKDIR /capr

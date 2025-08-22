@@ -1,89 +1,43 @@
-FROM debian:bookworm-slim
+# =========================================
+# Base: Ubuntu 24.04 (Noble)
+# =========================================
+FROM ubuntu:24.04
 
-LABEL org.opencontainers.image.licenses="GPL-2.0-or-later" \
-    org.opencontainers.image.source="https://github.com/rocker-org/rocker" \
-    org.opencontainers.image.vendor="Rocker Project" \
-    org.opencontainers.image.authors="Dirk Eddelbuettel <edd@debian.org>"
+ENV DEBIAN_FRONTEND=noninteractive \
+    LC_ALL=en_US.UTF-8 \
+    LANG=en_US.UTF-8
 
-## Set a default user. Available via runtime flag `--user docker`
-## Add user to 'staff' group, granting them write privileges to /usr/local/lib/R/site.library
-## User should also have & own a home directory (for rstudio or linked volumes to work properly).
-RUN useradd -s /bin/bash -m docker \
-    && usermod -a -G staff docker
-
-## NB: No 'apt-get upgrade -y' in official images, see eg
-## https://github.com/docker-library/official-images/pull/13443#issuecomment-1297829291
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    ed \
-    less \
-    locales \
-    vim-tiny \
-    wget \
-    ca-certificates \
-    fonts-texgyre \
+# 1) OS deps (+ build toolchain + libs R packages commonly need)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    locales ca-certificates wget git curl openssh-client \
+    build-essential gfortran pkg-config \
+    # R itself (from Ubuntu repo; version-agnostic as requested)
+    r-base r-base-dev r-recommended \
+    # C/C++/Fortran-compiled CRAN pkg deps
+    libxml2-dev libcurl4-openssl-dev libssl-dev libgit2-dev libicu-dev \
+    libopenblas-dev liblapack-dev libarmadillo-dev libfontconfig1-dev \
+    # helpful for graphics/text shaping if pulled indirectly
+    libpng-dev libjpeg-dev libtiff5-dev libfreetype6-dev \
+    libharfbuzz-dev libfribidi-dev \
+    && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
+    && locale-gen \
+    && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-## Configure default locale, see https://github.com/rocker-org/rocker/issues/19
-RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-    && locale-gen en_US.utf8 \
-    && /usr/sbin/update-locale LANG=en_US.UTF-8
+# 2) Install CRAN packages (non-interactive, parallel)
+#    Feel free to add/remove pkgs in the vector below.
+RUN Rscript -e 'options(repos=c(CRAN="https://cloud.r-project.org"), Ncpus=parallel::detectCores()); \
+    install.packages(c( \
+    "Rcpp","RcppArmadillo","xml2","curl","openssl","git2r", \
+    "languageserver","testthat","roxygen2","rversions","urlchecker", \
+    "styler","lintr","devtools" \
+    ), dependencies=TRUE)'
 
-ENV LC_ALL=en_US.UTF-8
-ENV LANG=en_US.UTF-8
+RUN git config --global user.email "xi.rossi.luo@gmail.com" && 
+      git config --global user.name "Xi (Rossi) LUO"
 
-## Use Debian unstable via pinning -- new style via APT::Default-Release
-RUN echo "deb http://http.debian.net/debian sid main" > /etc/apt/sources.list.d/debian-unstable.list \
-    && echo 'APT::Default-Release "testing";' > /etc/apt/apt.conf.d/default \
-    && echo 'APT::Install-Recommends "false";' > /etc/apt/apt.conf.d/90local-no-recommends
+# 3) Default workdir (mount your project here in VS Code)
+WORKDIR /capr
 
-ENV R_BASE_VERSION=4.5.1
-
-# ## During the freeze, new (source) packages are in experimental and we place the binaries in our PPA
-# RUN echo "deb http://deb.debian.org/debian experimental main" > /etc/apt/sources.list.d/experimental.list \
-#    && echo "deb [trusted=yes] https://eddelbuettel.github.io/ppaR400 ./" > /etc/apt/sources.list.d/edd-r4.list
-
-## Now install R and littler, and create a link for littler in /usr/local/bin
-RUN apt-get update \
-    && apt-get install -y -t unstable --no-install-recommends \
-    libopenblas0-pthread \
-    littler \
-    build-essential \
-    git \
-    openssh-client \
-    gfortran \
-    libopenblas-dev \
-    liblapack-dev \
-    libarmadillo-dev \
-    libarmadillo11 \
-    r-cran-docopt \
-    r-cran-littler \
-    r-base=${R_BASE_VERSION}-* \
-    r-base-dev=${R_BASE_VERSION}-* \
-    r-base-core=${R_BASE_VERSION}-* \
-    r-recommended=${R_BASE_VERSION}-* \
-    && chown root:staff "/usr/local/lib/R/site-library" \
-    && chmod g+ws "/usr/local/lib/R/site-library" \
-    && ln -s /usr/lib/R/site-library/littler/examples/install.r /usr/local/bin/install.r \
-    && ln -s /usr/lib/R/site-library/littler/examples/install2.r /usr/local/bin/install2.r \
-    && ln -s /usr/lib/R/site-library/littler/examples/installBioc.r /usr/local/bin/installBioc.r \
-    && ln -s /usr/lib/R/site-library/littler/examples/installDeps.r /usr/local/bin/installDeps.r \
-    && ln -s /usr/lib/R/site-library/littler/examples/installGithub.r /usr/local/bin/installGithub.r \
-    && ln -s /usr/lib/R/site-library/littler/examples/testInstalled.r /usr/local/bin/testInstalled.r \
-    && rm -rf /tmp/downloaded_packages/ /tmp/*.rds \
-    && rm -rf /var/lib/apt/lists/*
-
-# ---- 2. R package installation ---------------------------------------------
-# Copy your install script into the image
-COPY .devcontainer/install_pkgs.R /capr/
-
-# Run it non-interactively (Rscript is clearer than R CMD BATCH here)
-RUN Rscript --vanilla /capr/install_pkgs.R
-
-# Install CRAN pkgs in one shot (fewer layers)
-RUN install2.r --error --skipinstalled -n $(getconf _NPROCESSORS_ONLN) \
-    Rcpp RcppArmadillo xml2 curl openssl git2r \
-    languageserver testthat roxygen2 rversions urlchecker styler lintr devtools
-
-
-CMD ["R"]
+# 4) Default command
+# CMD ["R"]

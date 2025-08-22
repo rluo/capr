@@ -9,7 +9,7 @@ target_lib <- .libPaths()[1]
 install.packages(
     c(
         "Rcpp", "RcppArmadillo", "languageserver",
-        "testthat", "roxygen2", "rversions", "urlchecker", 
+        "testthat", "roxygen2", "rversions", "urlchecker",
         "styler", "xml2", "lintr", "devtools"
     ),
     quiet = FALSE, # suppress progress output

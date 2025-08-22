@@ -7,7 +7,7 @@
 //    minimise   γᵀ A γ      s.t.   γᵀ H γ = 1
 //
 //  •  H  must be symmetric positive-definite
-//  •  A  symmetric 
+//  •  A  symmetric
 //--------------------------------------------------------------------------
 static arma::vec solve_gamma_unconstrained(const arma::mat& A,
                                            const arma::mat& H) {
@@ -173,7 +173,6 @@ static CAPResult CAP_one_component(const arma::cube& S, const arma::mat& X,
   Returns a cube of the same shape as Y with slices Ỹᵢ.
 ────────────────────────────────────────────────────────────────────────────*/
 
-// [[Rcpp::export]]
 arma::cube rank_complete_y(const arma::cube& Y,          // p × p × n
                            const arma::mat& Gamma_prev,  // p × (k-1)
                            const arma::mat& B)           // q × (k-1)
@@ -218,94 +217,82 @@ arma::cube rank_complete_y(const arma::cube& Y,          // p × p × n
   return Y_tilde;
 }
 
-/*──────────────────────────────────────────────────────────────────────────────
-   ❶  Rank–completion for the Σ-matrices  (Section 5.2, “fix S_i”)
-
-     •  Yields  S̃_i^(k)  that carry over variance in the Γ^(k-1) directions
-        via   exp(β_{j0})  (intercepts in B).
-
-   INPUT
-     S_cube      p × p × n    original S_i  (symmetric, p.d.)
-     Gamma_prev  p × (k-1)    previously fitted directions
-     B           q × (k-1)    coefficient matrix, row-0 = β_{j0}
-
-   OUTPUT
-     p × p × n   cube S_tilde  (same shape as S_cube)
-
-   ALGORITHM  (for each i = 1..n)
-     P      = Γ Γᵀ
-     S_res  = (I−P) S_i (I−P)                   # rank ≤ p−(k−1)
-     [V,D]  = eig_sym(S_res)                    # D ascending
-     Replace the first (k−1) eigen-values       # (smallest / ≈ 0)
-         D̃_j = exp( β_{j0} )                   #  j = 1..k−1
-     S̃_i   = V diag(D̃) Vᵀ
-──────────────────────────────────────────────────────────────────────────────*/
-
-// [[Rcpp::export]]
-arma::cube rank_complete_s_old(const arma::cube& S_cube,     // p×p×n
-                               const arma::mat& Gamma_prev,  // p×(k−1)
-                               const arma::mat& B)           // q×(k−1)
-{
-  const arma::uword p = S_cube.n_rows, n = S_cube.n_slices,
-                    kminus1 = Gamma_prev.n_cols;  // k-1
-
-  if (kminus1 != 0 && B.n_cols != kminus1)
-    Rcpp::stop("B must have k-1 columns, same as Gamma_prev.");
-
-  // intercepts β_{j0}  (first row)
-  arma::rowvec beta0 = (kminus1 == 0) ? arma::rowvec() : B.row(0);
-
-  const arma::mat P = (kminus1 == 0) ? arma::mat(p, p, arma::fill::zeros)
-                                     : Gamma_prev * Gamma_prev.t();
-  const arma::mat IminusP = arma::eye(p, p) - P;
-
-  arma::cube S_tilde(p, p, n);
-
-  for (arma::uword i = 0; i < n; ++i) {
-    arma::mat S_res = IminusP * S_cube.slice(i) * IminusP;  // (1)
-
-    arma::vec eval;
-    arma::mat evec;
-    arma::eig_sym(eval, evec, S_res, "std");  // ascending λ₁ ≤ … ≤ λ_p
-
-    // Replace the k−1 smallest eigenvalues
-    for (arma::uword j = 0; j < kminus1; ++j)
-      eval(j) = std::exp(beta0(j));  //   √ dropped in derivation
-
-    arma::mat S_new = evec * arma::diagmat(eval) * evec.t();
-    S_tilde.slice(i) =
-        0.5 * (S_new + S_new.t());  // enforce symmetry numerically
-  }
-  return S_tilde;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-//  Rank-completion of Σ-matrices via “max-exp” rule (latex description)
-//
-//  INPUT
-//    • S_cube      p × p × n      original   Σ_i      (symmetric p.d.)
-//    • X           n × q          design matrix      (rows x_i^T)
-//    • Gamma_prev  p × (k−1)      previously fitted directions Γ^{(k-1)}
-//    • B           q × (k−1)      coefficient matrix (col-j for component j)
-//                                  — first row is β_{j0} (intercept)
-//
-//  ALGORITHM
-//      E_{ik}  = exp( x_i^T  B_{·k} )                         // n × (k−1)
-//      a       = max_{i,k}  E_{ik}
-//
-//      for i = 1..n
-//          d_i  = a − E_{i·}          // length (k−1)
-//          S̃_i = S_i  +  Γ diag(d_i) Γᵀ
-//
-//  OUTPUT
-//      cube S_tilde   p × p × n       completed Σ̃_i^(k)
-//
-//  NOTES
-//      • If k−1 = 0 (i.e. Γ_prev has zero columns) the function simply
-//        returns S_cube unchanged.
-//      • All matrices are treated as column-major (Armadillo default).
-//////////////////////////////////////////////////////////////////////////////
-
+/**
+ * @title Rank-completion of Sigma matrices via the max-exp rule
+ * @name rank_complete_s
+ * @description
+ * Rank-completes a stack of covariance (Sigma) matrices using the
+ * “max-exp” rule from a generalized low-rank structure. Given
+ * previously-fitted directions \eqn{\Gamma} and coefficients \eqn{B},
+ * it computes \eqn{E = \exp(X B)} (elementwise), takes
+ * \eqn{a = \max_{i,k} E_{ik}}, and for each slice \eqn{i=1,\dots,n}
+ * returns
+ * \deqn{\tilde{S}_i \;=\; S_i \;+\; \Gamma \; \mathrm{diag}(a - E_{i\cdot}) \;
+ * \Gamma^\top.}
+ *
+ * @details
+ * **Inputs and shapes (column-major, Armadillo default)**
+ * - \code{S_cube}: \eqn{p \times p \times n} stack of original
+ *   covariance matrices \eqn{S_i} (symmetric positive definite).
+ * - \code{X}: \eqn{n \times q} design matrix (rows are \eqn{x_i^\top}).
+ * - \code{Gamma_prev}: \eqn{p \times (k-1)} matrix of previously fitted
+ *   directions \eqn{\Gamma^{(k-1)}}.
+ * - \code{B}: \eqn{q \times (k-1)} coefficient matrix whose
+ *   \eqn{k-1} columns correspond to components; its first row may
+ *   represent an intercept if your model uses one (then ensure
+ *   \code{X} contains a column of ones).
+ *
+ * **Algorithm (max-exp rule)**
+ * 1. \eqn{E \leftarrow \exp(X B)} (elementwise), \eqn{E \in \mathbb{R}^{n
+ * \times (k-1)}}.
+ * 2. \eqn{a \leftarrow \max(E)} (scalar maximum over all entries).
+ * 3. For each \eqn{i=1,\dots,n}, set \eqn{d_i = a \mathbf{1} - E_{i\cdot}} and
+ *    \eqn{\tilde{S}_i = S_i + \Gamma \mathrm{diag}(d_i)\Gamma^\top}.
+ *
+ * **Edge cases**
+ * - If \eqn{k-1 = 0} (i.e., \code{Gamma_prev} has zero columns),
+ *   the input \code{S_cube} is returned unchanged.
+ *
+ * **Dimension checks**
+ * - \code{nrow(X)} must equal the number of slices \code{n} in \code{S_cube}.
+ * - \code{B} must be \eqn{q \times (k-1)} where \eqn{q = ncol(X)}.
+ *
+ * @param S_cube A numeric cube of size \eqn{p \times p \times n}:
+ *   original covariance matrices \eqn{S_i}.
+ * @param X A numeric matrix \eqn{n \times q}: design matrix (rows
+ * \eqn{x_i^\top}).
+ * @param Gamma_prev A numeric matrix \eqn{p \times (k-1)}:
+ *   previously fitted directions \eqn{\Gamma^{(k-1)}}.
+ * @param B A numeric matrix \eqn{q \times (k-1)}: coefficient matrix
+ *   (column \eqn{j} corresponds to component \eqn{j}).
+ *
+ * @return A numeric cube \eqn{p \times p \times n} containing the completed
+ * matrices \eqn{\tilde{S}_i^{(k)}} in the same slice order as \code{S_cube}.
+ *
+ * @section Notes:
+ * - All matrices are treated as column-major.
+ * - No symmetry-enforcement step is applied; inputs should be symmetric
+ *   and operations preserve symmetry up to numerical rounding.
+ *
+ * @examples
+ * \dontrun{
+ *   set.seed(1)
+ *   p <- 3; n <- 4; q <- 2; k1 <- 2  # k-1 = 2
+ *   S_cube <- array(0, dim = c(p, p, n))
+ *   for (i in 1:n) {
+ *     A <- matrix(rnorm(p*p), p, p)
+ *     S_cube[,,i] <- crossprod(A) + diag(p)  # SPD
+ *   }
+ *   X <- matrix(rnorm(n*q), n, q)
+ *   Gamma_prev <- matrix(rnorm(p*k1), p, k1)
+ *   B <- matrix(rnorm(q*k1), q, k1)
+ *   out <- rank_complete_s(S_cube, X, Gamma_prev, B)
+ *   dim(out)  # p x p x n
+ * }
+ *
+ * @seealso \code{\link[=Rcpp]{Rcpp}}, \code{\link{RcppArmadillo}}
+ * @export
+ */
 // [[Rcpp::export]]
 arma::cube rank_complete_s(const arma::cube& S_cube,     // p×p×n
                            const arma::mat& X,           // n×q
@@ -384,11 +371,42 @@ arma::vec orthogonalise_qr(const arma::vec& gamma_k,
   return g;
 }
 
-//--------------------------------------------------------------------------
-//  Cosine similarity   cos(θ) = (aᵀ b) / (‖a‖₂ ‖b‖₂)
-//  • Accepts any Armadillo dense vector flavour (vec / rowvec / subview)
-//  • Throws if one of the inputs has (near-)zero length.
-//--------------------------------------------------------------------------
+/**
+ * @title Cosine Similarity Between Two Vectors
+ * @name cosine_similarity
+ * @description
+ * Computes the cosine similarity between two numeric vectors
+ * \eqn{a} and \eqn{b}:
+ * \deqn{\cos(\theta) \;=\; \frac{a^\top b}{\|a\|_2 \; \|b\|_2}}
+ * where \eqn{\|\cdot\|_2} denotes the Euclidean (L2) norm.
+ *
+ * @details
+ * - The function accepts any Armadillo dense vector type (e.g. `arma::vec`,
+ *   `arma::rowvec`, or subviews).
+ * - Both vectors must be the same length; otherwise an error is thrown.
+ * - If either vector has (near-)zero norm (smaller than \code{eps}),
+ *   the function throws an error.
+ *
+ * @param a A numeric vector.
+ * @param b A numeric vector of the same length as \code{a}.
+ * @param eps A small numeric tolerance (default \code{1e-12}) used to guard
+ *   against division by zero if one of the vectors is near zero length.
+ *
+ * @return A scalar numeric value in \eqn{[-1, 1]} giving the cosine similarity.
+ *
+ * @examples
+ * # Two identical vectors => cosine similarity = 1
+ * cosine_similarity(c(1, 2, 3), c(1, 2, 3))
+ *
+ * # Orthogonal vectors => cosine similarity = 0
+ * cosine_similarity(c(1, 0), c(0, 1))
+ *
+ * # Opposite vectors => cosine similarity = -1
+ * cosine_similarity(c(1, 2), c(-1, -2))
+ *
+ * @seealso \code{\link[=Rcpp]{Rcpp}}, \code{\link{RcppArmadillo}}
+ * @export
+ */
 // [[Rcpp::export]]
 double cosine_similarity(const arma::vec& a, const arma::vec& b,
                          const double eps = 1e-12) {
@@ -401,6 +419,72 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b,
 
   return arma::dot(a, b) / (na * nb);
 }
+
+/**
+ * @title Multi-Component Common Axis Projection (CAP)
+ * @name cap_multi_comp
+ * @description
+ * Fits multiple CAP components sequentially by alternating updates of
+ * direction vectors \eqn{\gamma^{(k)}} and regression coefficients
+ * \eqn{\beta^{(k)}}. Each component is estimated using a flip–flop algorithm,
+ * with optional orthogonalization of successive directions and optional
+ * rank-completion of the covariance cube.
+ *
+ * @details
+ * For \eqn{k = 1, \dots, K}:
+ * - Initialize \eqn{\beta^{(k)}} (zeros) and \eqn{\gamma^{(k)}} (random
+ * normal).
+ * - If \code{k > 0} and \code{orth = TRUE}, orthogonalize \eqn{\gamma^{(k)}}
+ *   against previously found directions.
+ * - Optionally rank-complete the covariance cube \eqn{S} given previous
+ *   directions and coefficients.
+ * - Run \code{CAP_one_component()} until convergence or until \code{max_iter}
+ *   is reached, updating \eqn{\beta^{(k)}} and \eqn{\gamma^{(k)}}.
+ * - Store results in the matrices \code{B} and \code{Gamma}.
+ *
+ * @param S A numeric cube of size \eqn{p \times p \times n}, representing
+ *   a stack of covariance matrices \eqn{S_i}.
+ * @param X A numeric matrix of size \eqn{n \times q}, the design matrix
+ *   (rows \eqn{x_i^\top}).
+ * @param T A numeric vector of length \eqn{n}, auxiliary data such as
+ *   time indices or response variable depending on the CAP variant.
+ * @param K Integer, number of CAP components to fit.
+ * @param max_iter Maximum number of flip–flop iterations per component
+ *   (default \code{200}).
+ * @param tol Numeric convergence tolerance (default \code{1e-6}).
+ * @param orth Logical; if \code{TRUE} (default), enforce orthogonality
+ *   of successive direction vectors by QR-orthogonalization.
+ *
+ * @return An R list with two components:
+ * \item{B}{Matrix of regression coefficients of size \eqn{q \times K}.
+ *   Column \eqn{k} stores \eqn{\beta^{(k)}}.}
+ * \item{Gamma}{Matrix of direction vectors of size \eqn{p \times K}.
+ *   Column \eqn{k} stores \eqn{\gamma^{(k)}}.}
+ *
+ * @note
+ * - Requires \code{CAP_one_component()} and \code{rank_complete_s()} to be
+ *   available in the package namespace.
+ * - Random initialization of \eqn{\gamma^{(k)}} may yield slightly
+ *   different solutions across runs.
+ *
+ * @examples
+ * \dontrun{
+ *   set.seed(123)
+ *   p <- 5; n <- 20; q <- 3; K <- 2
+ *   S <- array(0, dim = c(p, p, n))
+ *   for (i in 1:n) {
+ *     A <- matrix(rnorm(p*p), p, p)
+ *     S[,,i] <- crossprod(A) + diag(p)
+ *   }
+ *   X <- matrix(rnorm(n*q), n, q)
+ *   T <- rnorm(n)
+ *   res <- cap_multi_comp(S, X, T, K)
+ *   str(res)
+ * }
+ *
+ * @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
+ * @export
+ */
 // [[Rcpp::export]]
 Rcpp::List cap_multi_comp(const arma::cube& S, const arma::mat& X,
                           const arma::vec& T, const int K,

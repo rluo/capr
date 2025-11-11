@@ -80,7 +80,7 @@ static arma::vec solve_gamma(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-//  β–STEP  (one Newton / Fisher scoring update)
+//  β–STEP  (one Newton / Fisher like scoring update)
 // ─────────────────────────────────────────────────────────────────────────────
 static arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
                              const arma::vec& T, const arma::vec& beta,

@@ -1,6 +1,22 @@
-# capa
+# capr
 
 R package for implementing the algorithms in the CAP [paper](https://doi.org/10.1093/biostatistics/kxz057) using [Armadillo](https://arma.sourceforge.net/).
+
+
+# Project Roadmap
+
+## Current Focus (Version 0.2)
+
+*  Implement core functionality using Armadillo and C++ 17
+   *  [ ] Core CAP regression with and without orthogonality constraints
+   *  [ ] S3 print and summary mehtods
+   *  [ ] Improved component effects removal method
+
+
+## Future Releases
+
+*  High dimensional CAP
+*  Longitudinal CAP
 
 
 

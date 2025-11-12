@@ -421,15 +421,13 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b,
 }
 
 /**
- * @title Multi-Component Common Axis Projection (CAP)
- * @name cap_multi_comp
+ * @title multi-Component Covariate Assisted Projection (CAP) Regression
+ * @name capr
  * @description
  * Fits multiple CAP components sequentially by alternating updates of
  * direction vectors \eqn{\gamma^{(k)}} and regression coefficients
  * \eqn{\beta^{(k)}}. Each component is estimated using a flip–flop algorithm,
- * with optional orthogonalization of successive directions and optional
- * rank-completion of the covariance cube.
- *
+ * with optional orthogonalization of successive directions.
  * @details
  * For \eqn{k = 1, \dots, K}:
  * - Initialize \eqn{\beta^{(k)}} (zeros) and \eqn{\gamma^{(k)}} (random
@@ -478,7 +476,7 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b,
  *   }
  *   X <- matrix(rnorm(n*q), n, q)
  *   T <- rnorm(n)
- *   res <- cap_multi_comp(S, X, T, K)
+ *   res <- capr(S, X, T, K)
  *   str(res)
  * }
  *
@@ -486,10 +484,9 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b,
  * @export
  */
 // [[Rcpp::export]]
-Rcpp::List cap_multi_comp(const arma::cube& S, const arma::mat& X,
-                          const arma::vec& T, const int K,
-                          const int max_iter = 200, const double tol = 1e-6,
-                          const bool orth = true) {
+Rcpp::List capr(const arma::cube& S, const arma::mat& X, const arma::vec& T,
+                const int K, const int max_iter = 200, const double tol = 1e-6,
+                const bool orth = true) {
   const arma::uword p = S.n_rows;
   const arma::uword q = X.n_cols;
 

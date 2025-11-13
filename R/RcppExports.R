@@ -27,3 +27,13 @@ cosine_similarity <- function(a, b, eps) {
     .Call(`_capr_cosine_similarity`, a, b, eps)
 }
 
+#' Log deviation from diagonality
+#'
+#' Computes \eqn{\sum_i n_i (\log \det \operatorname{diag}(B^\top S_i B) -
+#' \log \det(B^\top S_i B))}, the criterion minimized by the FG algorithm.
+#'
+#' @noRd
+log_deviation_from_diagonality <- function(S_cube, nval, B) {
+    .Call(`_capr_log_deviation_from_diagonality`, S_cube, nval, B)
+}
+

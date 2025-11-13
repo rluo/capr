@@ -12,16 +12,16 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // FG_cpp
-arma::mat FG_cpp(const Rcpp::List& cov_Group, int L, int P, int M);
-RcppExport SEXP _capr_FG_cpp(SEXP cov_GroupSEXP, SEXP LSEXP, SEXP PSEXP, SEXP MSEXP) {
+arma::mat FG_cpp(const arma::cube& cov_cube, int maxit, int P, int M);
+RcppExport SEXP _capr_FG_cpp(SEXP cov_cubeSEXP, SEXP maxitSEXP, SEXP PSEXP, SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const Rcpp::List& >::type cov_Group(cov_GroupSEXP);
-    Rcpp::traits::input_parameter< int >::type L(LSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type cov_cube(cov_cubeSEXP);
+    Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type P(PSEXP);
     Rcpp::traits::input_parameter< int >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(FG_cpp(cov_Group, L, P, M));
+    rcpp_result_gen = Rcpp::wrap(FG_cpp(cov_cube, maxit, P, M));
     return rcpp_result_gen;
 END_RCPP
 }

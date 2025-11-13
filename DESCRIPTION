@@ -1,6 +1,8 @@
 Package: capr
 Title: Covariate Assisted Principal Regression
 Version: 0.2.0
+Author: Xi Luo [aut, cre], Yi Zhao [aut], Brian Caffo [aut]
+Maintainer: Xi Luo <xi.rossi.luo@gmail.com>
 Authors@R: 
     c(
         person("Xi", "Luo", , email = "xi.rossi.luo@gmail.com", role = c("aut", "cre")),

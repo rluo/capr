@@ -5,9 +5,9 @@
 #include <functional>
 #include <optional>
 
-#include "complete.hpp"
-#include "solve.hpp"
-#include "util.hpp"
+#include "complete.h"
+#include "solve.h"
+#include "util.h"
 
 using OptGamma = std::optional<std::reference_wrapper<const arma::mat>>;
 

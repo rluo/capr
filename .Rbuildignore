@@ -1,0 +1,8 @@
+^\.git$
+^\.gitignore$
+^\.DS_Store$
+^R/\.DS_Store$
+^\.vscode$
+^\.devcontainer$
+^capr_.*\.tar\.gz$
+^\.\.Rcheck$

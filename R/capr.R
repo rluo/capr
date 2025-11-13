@@ -50,7 +50,7 @@
 #' }
 #' @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 #' @export
-capr <- function(S, X, K, Gamma.init = NULL, B.init = NULL, weight = NULL, max_iter = 200L, tol = 1e-6, orth = TRUE) {
+capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_iter = 200L, tol = 1e-6, orth = TRUE) {
     # ---- type checks ----
     # S: numeric p x p x n
     if (!is.array(S) || length(dim(S)) != 3L || !is.numeric(S)) {
@@ -116,125 +116,22 @@ capr <- function(S, X, K, Gamma.init = NULL, B.init = NULL, weight = NULL, max_i
 
 
     if (K == 1) {
-        CAPre <- CAP_one_component(
+        CAPre <- CAP_one_component_unconstrained(
             S, X, weight,
             beta_init = beta_k,
             gamma_init = gamma_k,
-            Gprev = Gprev_step,
             max_iter = max_iter,
             tol = tol
         )
     } else {
-
-
-
-
-
-    }
-
-
-
-
-
-
-
-    # Optional routine
-    has_rank_complete <- is.function(rank_complete_s)
-
-    # ---- allocate outputs ----
-    Gamma <- matrix(0, nrow = p, ncol = K) # columns are gamma^(k)
-    B <- matrix(0, nrow = q, ncol = K) # columns are beta^(k)
-
-    # Working copy of S (may be rank-completed each step)
-    S_work <- S
-
-    # Helper: orthogonalize v against columns of Gprev via QR of Gprev
-    orthogonalise_qr <- function(v, Gprev) {
-        stopifnot(is.numeric(v), length(v) == p)
-        if (is.null(Gprev) || ncol(Gprev) == 0L) {
-            return(as.numeric(v))
-        }
-        # QR of Gprev gives orthonormal basis Q for its column space
-        qrobj <- qr(Gprev)
-        Q <- tryCatch(qr.Q(qrobj), error = function(e) NULL)
-        if (!is.null(Q)) {
-            proj <- drop(Q %*% (crossprod(Q, v)))
-            v <- v - proj
-        } else {
-            # Fallback to normal equations projection
-            coef <- tryCatch(solve(crossprod(Gprev), crossprod(Gprev, v)),
-                error = function(e) rep(0, ncol(Gprev))
-            )
-            v <- v - as.numeric(Gprev %*% coef)
-        }
-        # If nearly zero, jitter a bit
-        nv <- sqrt(sum(v^2))
-        if (!is.finite(nv) || nv < .Machine$double.eps) {
-            v <- stats::rnorm(p)
-            # remove Gprev component again
-            if (!is.null(Q)) v <- v - drop(Q %*% (crossprod(Q, v)))
-        }
-        v
-    }
-
-    # ---- main loop over components ----
-    for (k in seq_len(K)) {
-        # initialize beta_k and gamma_k
-        beta_k <- rep(0, q)
-        gamma_k <- stats::rnorm(p)
-
-        # If we already have previous directions, optionally orthogonalize and/or rank-complete
-        if (k > 1L) {
-            Gprev <- Gamma[, 1:(k - 1L), drop = FALSE]
-            if (orth) {
-                gamma_k <- orthogonalise_qr(gamma_k, Gprev)
-            }
-            if (has_rank_complete) {
-                # rank_complete_s(S, X, Gprev, Bprev)
-                Bprev <- B[, 1:(k - 1L), drop = FALSE]
-                S_work <- rank_complete_s(S, X, Gprev, Bprev)
-                # Basic sanity: keep dimensions
-                if (!is.array(S_work) || length(dim(S_work)) != 3L ||
-                    any(dim(S_work) != dim(S))) {
-                    stop("`rank_complete_s()` must return a numeric array with the same dim as `S`.", call. = FALSE)
-                }
-            } else {
-                S_work <- S
-            }
-        } else {
-            S_work <- S
-        }
-
-        # Prepare Gprev_step to pass: either the matrix of previous gammas, or a 0-column matrix
-        if (orth && k > 1L) {
-            Gprev_step <- Gamma[, 1:(k - 1L), drop = FALSE]
-        } else {
-            Gprev_step <- matrix(numeric(0), nrow = p, ncol = 0L)
-        }
-
-        # One flip–flop update via user-supplied routine
-        CAPre <- CAP_one_component(
-            S_work, X, T,
-            beta_init = beta_k,
-            gamma_init = gamma_k,
-            Gprev = Gprev_step,
-            max_iter = max_iter,
-            tol = tol
+        ## multiple components
+        CAPre <- CAP_multi_components(
+            S, X, weight, K,
+            B.init, Gamma.init, orth,
+            max_iter, tol
         )
-
-        # Validate CAPre
-        if (!is.list(CAPre) || !all(c("beta", "gamma") %in% names(CAPre))) {
-            stop("`CAP_one_component()` must return a list with elements `beta` and `gamma`.", call. = FALSE)
-        }
-        beta_out <- CAPre$beta
-        gamma_out <- CAPre$gamma
-        if (!is.numeric(beta_out) || length(beta_out) != q) stop("Returned `beta` has wrong length.", call. = FALSE)
-        if (!is.numeric(gamma_out) || length(gamma_out) != p) stop("Returned `gamma` has wrong length.", call. = FALSE)
-
-        # store results
-        B[, k] <- as.numeric(beta_out)
-        Gamma[, k] <- as.numeric(gamma_out)
     }
+
 
     list(B = B, Gamma = Gamma)
 }

@@ -30,7 +30,9 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b, double eps) {
 double log_deviation_from_diagonality(const arma::cube& S_cube,
                                       const arma::vec& nval,
                                       const arma::mat& B) {
-  assert(S_cube.n_slices == nval.size());
+  if (S_cube.n_slices != nval.n_elem)
+    Rcpp::stop("S_cube third dimension (%d) != length(nval) (%d)",
+               S_cube.n_slices, nval.n_elem);
   double sum = 0.0;
   for (size_t i = 0; i < S_cube.n_slices; ++i) {
     arma::mat BTAB = B.t() * S_cube.slice(i) * B;

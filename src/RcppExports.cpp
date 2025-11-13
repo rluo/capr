@@ -80,14 +80,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // cosine_similarity
-static inline double cosine_similarity(const arma::vec& a, const arma::vec& b, const double eps);
+double cosine_similarity(const arma::vec& a, const arma::vec& b, double eps);
 RcppExport SEXP _capr_cosine_similarity(SEXP aSEXP, SEXP bSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const double >::type eps(epsSEXP);
+    Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
     rcpp_result_gen = Rcpp::wrap(cosine_similarity(a, b, eps));
     return rcpp_result_gen;
 END_RCPP

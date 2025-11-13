@@ -18,7 +18,7 @@ test_that("capr estimates multiple orthogonal components", {
 
     H <- sim$H
     gram <- t(fit$Gamma) %*% H %*% fit$Gamma
-    expect_equal(diag(gram), rep(1, K), tolerance = 1e-6)
+    expect_equal(unname(diag(gram)), rep(1, K), tolerance = 1e-6)
     expect_lt(abs(gram[1, 2]), 1e-6)
 
     align_scores <- cosine_alignment_scores(fit$Gamma, sim$Q)

@@ -19,6 +19,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # helpful for graphics/text shaping if pulled indirectly
     libpng-dev libjpeg-dev libtiff5-dev libfreetype6-dev \
     libharfbuzz-dev libfribidi-dev \
+    # ---- LaTeX stack for R packages ----
+    texlive-latex-base \
+    texlive-latex-recommended \
+    texlive-latex-extra \
+    texlive-fonts-recommended \
+    texlive-fonts-extra \
+    texlive-luatex \
+    # misc tools that R CMD check likes to have
+    ghostscript qpdf \
     && echo "en_US.UTF-8 UTF-8" > /etc/locale.gen \
     && locale-gen \
     && update-ca-certificates \

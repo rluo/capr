@@ -20,7 +20,13 @@ R package for implementing the algorithms in the CAP [paper](https://doi.org/10.
 
 
 
-# Development environment
+# Package build
+
+    devtools::document()
+    devtools::install()
+    devtools::check()
+
+# Development environment setup
 
 Package skeleton:
 

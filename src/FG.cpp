@@ -46,7 +46,7 @@ arma::mat FG(const arma::cube& arr, const arma::vec& nval, int max_iter = 100,
   arma::vec d1(M, arma::fill::zeros), d2(M, arma::fill::zeros);
 
   for (int l = 0; l < max_iter; ++l) {
-    crit_old = log_deviation_from_diagonality(arr, nval, B);
+    crit_old = log_deviation_from_diagonality_cpp(arr, nval, B);
     // B_old = B;
     for (int p = 0; p < P - 1; ++p) {
       for (int e = p + 1; e < P; ++e) {
@@ -104,7 +104,7 @@ arma::mat FG(const arma::cube& arr, const arma::vec& nval, int max_iter = 100,
         B.col(e) = update.col(1);
       }
     }
-    if (crit_old - log_deviation_from_diagonality(arr, nval, B) < epsilon) {
+    if (crit_old - log_deviation_from_diagonality_cpp(arr, nval, B) < epsilon) {
       break;
     }
   }

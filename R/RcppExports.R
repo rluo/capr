@@ -27,8 +27,8 @@ CAP_multi_components <- function(S, X, T, K, Binit, Gammainit, orth = TRUE, max_
 #' vectors must have the same length and non-zero norms.
 #'
 #' @noRd
-cosine_similarity <- function(a, b, eps) {
-    .Call(`_capr_cosine_similarity`, a, b, eps)
+cosine_similarity_cpp <- function(a, b, eps) {
+    .Call(`_capr_cosine_similarity_cpp`, a, b, eps)
 }
 
 #' Log deviation from diagonality
@@ -37,7 +37,7 @@ cosine_similarity <- function(a, b, eps) {
 #' \log \det(B^\top S_i B))}, the criterion minimized by the FG algorithm.
 #'
 #' @noRd
-log_deviation_from_diagonality <- function(S_cube, nval, B) {
-    .Call(`_capr_log_deviation_from_diagonality`, S_cube, nval, B)
+log_deviation_from_diagonality_cpp <- function(S_cube, nval, B) {
+    .Call(`_capr_log_deviation_from_diagonality_cpp`, S_cube, nval, B)
 }
 

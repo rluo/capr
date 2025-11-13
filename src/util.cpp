@@ -8,8 +8,9 @@
 //' vectors must have the same length and non-zero norms.
 //'
 //' @noRd
-// [[Rcpp::export]]
-double cosine_similarity(const arma::vec& a, const arma::vec& b, double eps) {
+// [[Rcpp::export(name = "cosine_similarity_cpp")]]
+double cosine_similarity_cpp(const arma::vec& a, const arma::vec& b,
+                             double eps) {
   if (a.n_elem != b.n_elem) Rcpp::stop("cosine_similarity: size mismatch");
 
   const double na = arma::norm(a, 2);
@@ -26,10 +27,10 @@ double cosine_similarity(const arma::vec& a, const arma::vec& b, double eps) {
 //' \log \det(B^\top S_i B))}, the criterion minimized by the FG algorithm.
 //'
 //' @noRd
-// [[Rcpp::export]]
-double log_deviation_from_diagonality(const arma::cube& S_cube,
-                                      const arma::vec& nval,
-                                      const arma::mat& B) {
+// [[Rcpp::export(name = "log_deviation_from_diagonality_cpp")]]
+double log_deviation_from_diagonality_cpp(const arma::cube& S_cube,
+                                          const arma::vec& nval,
+                                          const arma::mat& B) {
   if (S_cube.n_slices != nval.n_elem)
     Rcpp::stop("S_cube third dimension (%d) != length(nval) (%d)",
                S_cube.n_slices, nval.n_elem);

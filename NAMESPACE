@@ -3,5 +3,7 @@
 export(FG)
 export(FG2)
 export(capr)
+export(cosine_similarity)
+export(log_deviation_from_diagonality)
 importFrom(Rcpp,evalCpp)
 useDynLib(capr, .registration = TRUE)

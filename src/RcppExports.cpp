@@ -93,29 +93,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cosine_similarity
-double cosine_similarity(const arma::vec& a, const arma::vec& b, double eps);
-RcppExport SEXP _capr_cosine_similarity(SEXP aSEXP, SEXP bSEXP, SEXP epsSEXP) {
+// cosine_similarity_cpp
+double cosine_similarity_cpp(const arma::vec& a, const arma::vec& b, double eps);
+RcppExport SEXP _capr_cosine_similarity_cpp(SEXP aSEXP, SEXP bSEXP, SEXP epsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type eps(epsSEXP);
-    rcpp_result_gen = Rcpp::wrap(cosine_similarity(a, b, eps));
+    rcpp_result_gen = Rcpp::wrap(cosine_similarity_cpp(a, b, eps));
     return rcpp_result_gen;
 END_RCPP
 }
-// log_deviation_from_diagonality
-double log_deviation_from_diagonality(const arma::cube& S_cube, const arma::vec& nval, const arma::mat& B);
-RcppExport SEXP _capr_log_deviation_from_diagonality(SEXP S_cubeSEXP, SEXP nvalSEXP, SEXP BSEXP) {
+// log_deviation_from_diagonality_cpp
+double log_deviation_from_diagonality_cpp(const arma::cube& S_cube, const arma::vec& nval, const arma::mat& B);
+RcppExport SEXP _capr_log_deviation_from_diagonality_cpp(SEXP S_cubeSEXP, SEXP nvalSEXP, SEXP BSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::cube& >::type S_cube(S_cubeSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type nval(nvalSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type B(BSEXP);
-    rcpp_result_gen = Rcpp::wrap(log_deviation_from_diagonality(S_cube, nval, B));
+    rcpp_result_gen = Rcpp::wrap(log_deviation_from_diagonality_cpp(S_cube, nval, B));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -126,8 +126,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_capr_CAP_one_component_unconstrained", (DL_FUNC) &_capr_CAP_one_component_unconstrained, 7},
     {"_capr_CAP_one_component", (DL_FUNC) &_capr_CAP_one_component, 8},
     {"_capr_CAP_multi_components", (DL_FUNC) &_capr_CAP_multi_components, 9},
-    {"_capr_cosine_similarity", (DL_FUNC) &_capr_cosine_similarity, 3},
-    {"_capr_log_deviation_from_diagonality", (DL_FUNC) &_capr_log_deviation_from_diagonality, 3},
+    {"_capr_cosine_similarity_cpp", (DL_FUNC) &_capr_cosine_similarity_cpp, 3},
+    {"_capr_log_deviation_from_diagonality_cpp", (DL_FUNC) &_capr_log_deviation_from_diagonality_cpp, 3},
     {NULL, NULL, 0}
 };
 

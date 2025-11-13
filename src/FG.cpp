@@ -10,9 +10,9 @@
  */
 
 // [[Rcpp::export]]
-arma::mat FG_cpp(const Rcpp::List& cov_Group, int L, int P, int M) {
+arma::mat FG_cpp(const Rcpp::List& cov_cube, int L, int P) {
   arma::mat B = arma::eye<arma::mat>(P, P);
-
+  int M = cov_cube.size()[2];
   for (int l = 0; l < L; ++l) {
     for (int p = 0; p < P - 1; ++p) {
       for (int e = p + 1; e < P; ++e) {
@@ -23,7 +23,7 @@ arma::mat FG_cpp(const Rcpp::List& cov_Group, int L, int P, int M) {
         arma::vec d2(M);
 
         for (int k = 0; k < M; ++k) {
-          arma::mat Ck = Rcpp::as<arma::mat>(cov_Group[k]);
+          arma::mat Ck = cov_cube.slice[k];
           arma::mat H = B.cols(arma::uvec({(unsigned)p, (unsigned)e}));
           T[k] = H.t() * Ck * H;
           d1(k) = arma::as_scalar(Q.col(0).t() * T[k] * Q.col(0));

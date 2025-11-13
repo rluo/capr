@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 
 // FG_cpp
 arma::mat FG_cpp(const Rcpp::List& cov_Group, int L, int P, int M);
-RcppExport SEXP _capp_FG_cpp(SEXP cov_GroupSEXP, SEXP LSEXP, SEXP PSEXP, SEXP MSEXP) {
+RcppExport SEXP _capr_FG_cpp(SEXP cov_GroupSEXP, SEXP LSEXP, SEXP PSEXP, SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,25 +25,84 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cap_solve
-arma::mat cap_solve(const arma::mat& X);
-RcppExport SEXP _capp_cap_solve(SEXP XSEXP) {
+// CAP_one_component_unconstrained
+Rcpp::List CAP_one_component_unconstrained(const arma::cube& S, const arma::mat& X, const arma::vec& T, arma::vec beta0, arma::vec gamma0, int max_iter, double tol);
+RcppExport SEXP _capr_CAP_one_component_unconstrained(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta0SEXP, SEXP gamma0SEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
-    rcpp_result_gen = Rcpp::wrap(cap_solve(X));
+    Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma0(gamma0SEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(CAP_one_component_unconstrained(S, X, T, beta0, gamma0, max_iter, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CAP_one_component
+Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X, const arma::vec& T, arma::vec beta0, arma::vec gamma0, const arma::mat& Gamma_prev, int max_iter, double tol);
+RcppExport SEXP _capr_CAP_one_component(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta0SEXP, SEXP gamma0SEXP, SEXP Gamma_prevSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type gamma0(gamma0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Gamma_prev(Gamma_prevSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(CAP_one_component(S, X, T, beta0, gamma0, Gamma_prev, max_iter, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// CAP_multi_components
+Rcpp::List CAP_multi_components(const arma::cube& S, const arma::mat& X, const arma::vec& T, const int K, const arma::mat& Binit, const arma::mat& Gammainit, const bool orth, const int max_iter, const double tol);
+RcppExport SEXP _capr_CAP_multi_components(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP KSEXP, SEXP BinitSEXP, SEXP GammainitSEXP, SEXP orthSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
+    Rcpp::traits::input_parameter< const int >::type K(KSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Binit(BinitSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type Gammainit(GammainitSEXP);
+    Rcpp::traits::input_parameter< const bool >::type orth(orthSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(CAP_multi_components(S, X, T, K, Binit, Gammainit, orth, max_iter, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
+// cosine_similarity
+static inline double cosine_similarity(const arma::vec& a, const arma::vec& b, const double eps);
+RcppExport SEXP _capr_cosine_similarity(SEXP aSEXP, SEXP bSEXP, SEXP epsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const double >::type eps(epsSEXP);
+    rcpp_result_gen = Rcpp::wrap(cosine_similarity(a, b, eps));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_capp_FG_cpp", (DL_FUNC) &_capp_FG_cpp, 4},
-    {"_capp_cap_solve", (DL_FUNC) &_capp_cap_solve, 1},
+    {"_capr_FG_cpp", (DL_FUNC) &_capr_FG_cpp, 4},
+    {"_capr_CAP_one_component_unconstrained", (DL_FUNC) &_capr_CAP_one_component_unconstrained, 7},
+    {"_capr_CAP_one_component", (DL_FUNC) &_capr_CAP_one_component, 8},
+    {"_capr_CAP_multi_components", (DL_FUNC) &_capr_CAP_multi_components, 9},
+    {"_capr_cosine_similarity", (DL_FUNC) &_capr_cosine_similarity, 3},
     {NULL, NULL, 0}
 };
 
-RcppExport void R_init_capp(DllInfo *dll) {
+RcppExport void R_init_capr(DllInfo *dll) {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
 }

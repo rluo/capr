@@ -80,16 +80,28 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
 
     if (is.null(Gamma.init)) {
         Gamma.init <- matrix(stats::rnorm(p * K), nrow = p, ncol = K)
-    } else if (!is.matrix(Gamma.init) || !identical(dim(Gamma.init), c(p, K)) || !is.numeric(Gamma.init)) {
-        stop("`Gamma.init` must be NULL, a numeric matrix of size p x K, or a numeric vector of length p*K.", call. = FALSE)
+    } else {
+        if (is.numeric(Gamma.init) && is.null(dim(Gamma.init)) && length(Gamma.init) == p * K) {
+            Gamma.init <- matrix(Gamma.init, nrow = p, ncol = K)
+        }
+        if (!is.matrix(Gamma.init) || !identical(dim(Gamma.init), c(p, K)) || !is.numeric(Gamma.init)) {
+            stop("`Gamma.init` must be NULL, a numeric matrix of size p x K, or a numeric vector of length p*K.", call. = FALSE)
+        }
     }
+    storage.mode(Gamma.init) <- "double"
 
 
     if (is.null(B.init)) {
         B.init <- matrix(0, nrow = q, ncol = K)
-    } else if (!is.matrix(B.init) || !identical(dim(B.init), c(p, K)) || !is.numeric(B.init)) {
-        stop("`B.init` must be NULL, a numeric matrix of size p x K, or a numeric vector of length p*K.", call. = FALSE)
+    } else {
+        if (is.numeric(B.init) && is.null(dim(B.init)) && length(B.init) == q * K) {
+            B.init <- matrix(B.init, nrow = q, ncol = K)
+        }
+        if (!is.matrix(B.init) || !identical(dim(B.init), c(q, K)) || !is.numeric(B.init)) {
+            stop("`B.init` must be NULL, a numeric matrix of size q x K, or a numeric vector of length q*K.", call. = FALSE)
+        }
     }
+    storage.mode(B.init) <- "double"
 
 
     if (is.null(weight)) weight <- rep(1, n)
@@ -97,6 +109,10 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     # weight: numeric vector length n
     if (!is.numeric(weight) || is.matrix(weight) || length(weight) != n) {
         stop(sprintf("`weight` must be a numeric vector of length n (= %d).", n), call. = FALSE)
+    }
+    weight <- as.numeric(weight)
+    if (any(!is.finite(weight))) {
+        stop("`weight` must contain only finite values.", call. = FALSE)
     }
 
 
@@ -114,24 +130,27 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
         stop("`orth` must be a single logical (TRUE/FALSE).", call. = FALSE)
     }
 
+    cap_fit <- CAP_multi_components(
+        S = S,
+        X = X,
+        T = weight,
+        K = K,
+        Binit = B.init,
+        Gammainit = Gamma.init,
+        orth = orth,
+        max_iter = max_iter,
+        tol = tol
+    )
 
-    if (K == 1) {
-        CAPre <- CAP_one_component_unconstrained(
-            S, X, weight,
-            beta_init = beta_k,
-            gamma_init = gamma_k,
-            max_iter = max_iter,
-            tol = tol
-        )
-    } else {
-        ## multiple components
-        CAPre <- CAP_multi_components(
-            S, X, weight, K,
-            B.init, Gamma.init, orth,
-            max_iter, tol
-        )
+    B_hat <- cap_fit$B
+    Gamma_hat <- cap_fit$Gamma
+
+    if (!is.null(colnames(X))) {
+        rownames(B_hat) <- colnames(X)
     }
+    colnames(B_hat) <- paste0("Comp", seq_len(K))
+    colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
+    rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-
-    list(B = B, Gamma = Gamma)
+    list(B = B_hat, Gamma = Gamma_hat)
 }

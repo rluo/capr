@@ -2,10 +2,22 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 FG_cpp <- function(cov_Group, L, P, M) {
-    .Call('_capp_FG_cpp', PACKAGE = 'capp', cov_Group, L, P, M)
+    .Call('_capr_FG_cpp', PACKAGE = 'capr', cov_Group, L, P, M)
 }
 
-cap_solve <- function(X) {
-    .Call('_capp_cap_solve', PACKAGE = 'capp', X)
+CAP_one_component_unconstrained <- function(S, X, T, beta0, gamma0, max_iter = 200L, tol = 1e-6) {
+    .Call('_capr_CAP_one_component_unconstrained', PACKAGE = 'capr', S, X, T, beta0, gamma0, max_iter, tol)
+}
+
+CAP_one_component <- function(S, X, T, beta0, gamma0, Gamma_prev, max_iter = 200L, tol = 1e-6) {
+    .Call('_capr_CAP_one_component', PACKAGE = 'capr', S, X, T, beta0, gamma0, Gamma_prev, max_iter, tol)
+}
+
+CAP_multi_components <- function(S, X, T, K, Binit, Gammainit, orth = TRUE, max_iter = 200L, tol = 1e-6) {
+    .Call('_capr_CAP_multi_components', PACKAGE = 'capr', S, X, T, K, Binit, Gammainit, orth, max_iter, tol)
+}
+
+cosine_similarity <- function(a, b, eps = 1e-12) {
+    .Call('_capr_cosine_similarity', PACKAGE = 'capr', a, b, eps)
 }
 

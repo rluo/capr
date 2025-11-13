@@ -1,6 +1,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
 
+#include <algorithm>
 #include <functional>
 #include <optional>
 
@@ -44,7 +45,8 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   // --- scale γ so that  γᵀ H γ = 1  ---------------------------------------
   gamma /= std::sqrt(qf);
 
-  const has_constraints = opt_Gamma_pre && opt_Gamma_pre->get().n_cols > 0;
+  const bool has_constraints =
+      opt_Gamma_prev && opt_Gamma_prev->get().n_cols > 0;
 
   for (int it = 0; it < max_iter; ++it) {
     arma::vec beta_old = beta, gamma_old = gamma;
@@ -56,11 +58,8 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
     for (arma::uword i = 0; i < n; ++i)
       A += std::exp(-arma::dot(X.row(i), beta)) * S.slice(i);
 
-    if (has_constraints) {
-      gamma = solve_gamma(A, H, opt_Gamma_prev->get());
-    } else {
-      gamma = solve_gamma(A, H);
-    }
+    gamma = has_constraints ? solve_gamma(A, H, opt_Gamma_prev->get())
+                            : solve_gamma_unconstrained(A, H);
 
     if (std::max(arma::norm(beta - beta_old, "inf"),
                  arma::norm(gamma - gamma_old, "inf")) < tol)
@@ -70,24 +69,26 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   return {std::move(beta), std::move(gamma)};  // NRVO
 }
 
+// [[Rcpp::export]]
 Rcpp::List CAP_one_component_unconstrained(const arma::cube& S,
                                            const arma::mat& X,
                                            const arma::vec& T, arma::vec beta0,
                                            arma::vec gamma0, int max_iter = 200,
                                            double tol = 1e-6) {
-  CAPResult res =
-      CAP_one_component_core(S, X, T, beta0, gamma0, Gamma_prev, max_iter, tol);
+  CAPResult res = CAP_one_component_core(S, X, T, beta0, gamma0, std::nullopt,
+                                         max_iter, tol);
 
   return Rcpp::List::create(Rcpp::Named("beta") = res.beta,
                             Rcpp::Named("gamma") = res.gamma);
 }
 
+// [[Rcpp::export]]
 Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X,
                              const arma::vec& T, arma::vec beta0,
                              arma::vec gamma0, const arma::mat& Gamma_prev,
                              int max_iter = 200, double tol = 1e-6) {
-  CAPResult res =
-      CAP_one_component_core(S, X, T, beta0, gamma0, Gamma_prev, max_iter, tol);
+  CAPResult res = CAP_one_component_core(S, X, T, beta0, gamma0,
+                                         std::cref(Gamma_prev), max_iter, tol);
 
   return Rcpp::List::create(Rcpp::Named("beta") = res.beta,
                             Rcpp::Named("gamma") = res.gamma);
@@ -106,6 +107,7 @@ arma::vec orthogonalise_qr(const arma::vec& gamma_k,
   return g;
 }
 
+// [[Rcpp::export]]
 Rcpp::List CAP_multi_components(
     const arma::cube& S, const arma::mat& X, const arma::vec& T, const int K,
     const arma::mat& Binit, const arma::mat& Gammainit, const bool orth = true,
@@ -113,49 +115,35 @@ Rcpp::List CAP_multi_components(
   const arma::uword p = S.n_rows;
   const arma::uword q = X.n_cols;
 
-  arma::mat Gamma(p, K, arma::fill::zeros);  // store γ^{(1)},…,γ^{(K)}
-  arma::mat B(q, K, arma::fill::zeros);      // store β^{(1)},…,β^{(K)}
-
-  arma::mat Gamma_prev(p, K, arma::fill::zeros);  // pre-allocated
-
-  arma::cube S_work = S;  // may be rank-completed each step
+  arma::mat Gamma(p, K, arma::fill::zeros);
+  arma::mat B(q, K, arma::fill::zeros);
 
   for (int k = 0; k < K; ++k) {
-    // initialize β and γ
-    // arma::vec beta_k(q, arma::fill::zeros);
-    // arma::vec gamma_k = arma::randn<arma::vec>(p);
-
     arma::vec beta_k = Binit.col(k);
     arma::vec gamma_k = Gammainit.col(k);
 
-    // gamma_k /= arma::norm(gamma_k, 2);
+    arma::cube S_current = S;
+    OptGamma gamma_prev_opt = std::nullopt;
+    std::optional<arma::mat> Gprev_holder;
 
-    // rank-complete S if orthogonality step required
     if (k > 0) {
-      // use first k columns of Gamma_prev
-      arma::mat Gprev = Gamma.cols(0, k - 1);
-      // S_work = rank_complete_s_old(S, Gprev, B.cols(0, k - 1));
-      S_work = rank_complete_s(S, X, Gprev, B.cols(0, k - 1));
+      Gprev_holder.emplace(Gamma.cols(0, k - 1));
+      const arma::mat& Gprev = *Gprev_holder;
+      arma::mat Bprev = B.cols(0, k - 1);
+
+      S_current = rank_complete_s(S, X, Gprev, Bprev);
 
       if (orth) {
         gamma_k = orthogonalise_qr(gamma_k, Gprev);
-        // one flip–flop update
-        auto CAPre = CAP_one_component(S_work, X, T, beta_k, gamma_k, Gprev,
-                                       max_iter, tol);
-      } else {
-        auto CAPre = CAP_one_component_unconstrained(S, X, T, beta_k, gamma_k,
-                                                     max_it, tol);
+        gamma_prev_opt = std::cref(Gprev);
       }
-    } else {
-      auto CAPre = CAP_one_component_unconstrained(S, X, T, beta_k, gamma_k,
-                                                   max_it, tol);
     }
 
-    // store results
-    Gamma.col(k) = CAPre.gamma;
-    B.col(k) = CAPre.beta;
-    // copy back into Gamma_prev
-    // Gamma_prev.col(k) = CAPre.gamma;
+    CAPResult res = CAP_one_component_core(S_current, X, T, beta_k, gamma_k,
+                                           gamma_prev_opt, max_iter, tol);
+
+    Gamma.col(k) = res.gamma;
+    B.col(k) = res.beta;
   }
 
   return Rcpp::List::create(Rcpp::Named("B") = B, Rcpp::Named("Gamma") = Gamma);

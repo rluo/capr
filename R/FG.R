@@ -5,6 +5,14 @@
 #' cycles over all ordered pairs of variable indices and updates a \(2 \times 2\)
 #' rotation so that the transformed matrices share diagonal structure.
 #'
+#' Two solvers are exported:
+#' \describe{
+#'   \item{`FG()`}{Calls the original implementation in \code{FG.cpp}.}
+#'   \item{`FG2()`}{Calls the alternative implementation in \code{FG2.cpp} that
+#'   follows the same interface but can be used to benchmark or validate the
+#'   computation.}
+#' }
+#'
 #' @param cov_array Numeric 3D array of shape \eqn{P \times P \times M}
 #'   containing covariance matrices in its \eqn{M} slices.
 #' @param P Optional integer specifying the matrix dimension; defaults to
@@ -30,10 +38,25 @@
 #' cov_cube <- array(NA_real_, dim = c(P, P, M))
 #' for (k in 1:M) cov_cube[, , k] <- mats[[k]]
 #' FG(cov_cube, maxit = 5)
+#' FG2(cov_cube, maxit = 5)
 #' }
 #'
+#' @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 #' @export
 FG <- function(cov_array, P = NULL, M = NULL, maxit = 30L) {
+    args <- fg_validate_inputs(cov_array, P, M, maxit)
+    weights <- rep(1, args$M)
+    FG_cpp(args$cov_array, weights, args$maxit)
+}
+
+#' @rdname FG
+#' @export
+FG2 <- function(cov_array, P = NULL, M = NULL, maxit = 30L) {
+    args <- fg_validate_inputs(cov_array, P, M, maxit)
+    FG2_cpp(args$cov_array, args$maxit, args$P, args$M)
+}
+
+fg_validate_inputs <- function(cov_array, P, M, maxit) {
     if (!is.array(cov_array) || length(dim(cov_array)) != 3L || !is.numeric(cov_array)) {
         stop("`cov_array` must be a numeric P x P x M array.", call. = FALSE)
     }
@@ -63,5 +86,5 @@ FG <- function(cov_array, P = NULL, M = NULL, maxit = 30L) {
     P <- as.integer(P)
     M <- as.integer(M)
 
-    FG_cpp(cov_array, maxit, P, M)
+    list(cov_array = cov_array, P = P, M = M, maxit = maxit)
 }

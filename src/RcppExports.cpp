@@ -12,8 +12,22 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // FG_cpp
-arma::mat FG_cpp(const arma::cube& cov_cube, int maxit, int P, int M);
-RcppExport SEXP _capr_FG_cpp(SEXP cov_cubeSEXP, SEXP maxitSEXP, SEXP PSEXP, SEXP MSEXP) {
+arma::mat FG_cpp(const arma::cube& S_cube, const arma::vec& nval, const int max_iter, const double epsilon);
+RcppExport SEXP _capr_FG_cpp(SEXP S_cubeSEXP, SEXP nvalSEXP, SEXP max_iterSEXP, SEXP epsilonSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S_cube(S_cubeSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type nval(nvalSEXP);
+    Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< const double >::type epsilon(epsilonSEXP);
+    rcpp_result_gen = Rcpp::wrap(FG_cpp(S_cube, nval, max_iter, epsilon));
+    return rcpp_result_gen;
+END_RCPP
+}
+// FG2_cpp
+arma::mat FG2_cpp(const arma::cube& cov_cube, int maxit, int P, int M);
+RcppExport SEXP _capr_FG2_cpp(SEXP cov_cubeSEXP, SEXP maxitSEXP, SEXP PSEXP, SEXP MSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +35,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type maxit(maxitSEXP);
     Rcpp::traits::input_parameter< int >::type P(PSEXP);
     Rcpp::traits::input_parameter< int >::type M(MSEXP);
-    rcpp_result_gen = Rcpp::wrap(FG_cpp(cov_cube, maxit, P, M));
+    rcpp_result_gen = Rcpp::wrap(FG2_cpp(cov_cube, maxit, P, M));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -108,6 +122,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_capr_FG_cpp", (DL_FUNC) &_capr_FG_cpp, 4},
+    {"_capr_FG2_cpp", (DL_FUNC) &_capr_FG2_cpp, 4},
     {"_capr_CAP_one_component_unconstrained", (DL_FUNC) &_capr_CAP_one_component_unconstrained, 7},
     {"_capr_CAP_one_component", (DL_FUNC) &_capr_CAP_one_component, 8},
     {"_capr_CAP_multi_components", (DL_FUNC) &_capr_CAP_multi_components, 9},

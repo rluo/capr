@@ -1,10 +1,4 @@
-# -----------------------------------------------------------------------------
-#  Flury-Gautschi (1986) example reproduced via FG() + log deviation criterion
-# -----------------------------------------------------------------------------
-
-test_that("FG decreases the log-deviation criterion in the classic example", {
-    skip_on_cran()
-
+fg_example_fixture <- function() {
     P <- 6L
     M <- 2L
     cov_cube <- array(0, dim = c(P, P, M))
@@ -36,19 +30,30 @@ test_that("FG decreases the log-deviation criterion in the classic example", {
         0.0, 0.0878, 0.0, -0.0337, -0.5906, 0.8015
     ), P, P, byrow = TRUE)
 
-    fit <- FG(cov_cube, maxit = 200L)
+    list(P = P, M = M, cov_cube = cov_cube, B_ref = B_ref)
+}
 
-    expect_equal(dim(fit), c(P, P))
-    expect_true(all(is.finite(fit)))
-    expect_equal(crossprod(fit), diag(P), tolerance = 1e-6)
+fg_algorithms <- list(FG = FG, FG2 = FG2)
 
-    weights <- rep(1, M)
-    crit_identity <- log_deviation_from_diagonality(cov_cube, weights, diag(P))
-    crit_fit <- log_deviation_from_diagonality(cov_cube, weights, fit)
-    crit_ref <- log_deviation_from_diagonality(cov_cube, weights, B_ref)
+for (alg_name in names(fg_algorithms)) {
+    test_that(paste("FG decreases the log-deviation criterion (", alg_name, ")", sep = ""), {
+        skip_on_cran()
+        fixture <- fg_example_fixture()
 
-    expect_equal(crit_ref, 0.03432332, tolerance = 1e-6)
-    expect_lt(crit_fit, crit_identity)
-    expect_lt(crit_fit, crit_identity * 0.5)
-    expect_lt(crit_fit, crit_ref + 0.25)
-})
+        fit <- fg_algorithms[[alg_name]](fixture$cov_cube, maxit = 200L)
+
+        expect_equal(dim(fit), c(fixture$P, fixture$P))
+        expect_true(all(is.finite(fit)))
+        expect_equal(crossprod(fit), diag(fixture$P), tolerance = 1e-6)
+
+        weights <- rep(1, fixture$M)
+        crit_identity <- log_deviation_from_diagonality(fixture$cov_cube, weights, diag(fixture$P))
+        crit_fit <- log_deviation_from_diagonality(fixture$cov_cube, weights, fit)
+        crit_ref <- log_deviation_from_diagonality(fixture$cov_cube, weights, fixture$B_ref)
+
+        expect_equal(crit_ref, 0.03432332, tolerance = 1e-6)
+        expect_lt(crit_fit, crit_identity)
+        expect_lt(crit_fit, crit_identity * 0.5)
+        expect_lt(crit_fit, crit_ref + 0.25)
+    })
+}

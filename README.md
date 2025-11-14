@@ -54,3 +54,20 @@ Add Testing
 Add lintr
 
     usethis::use_lintr()
+
+
+Add Releases and TODOs
+
+    usethis::use_github()
+    usethis::use_tidy_issue_template()
+    usethis::use_news_md()
+
+
+## Release
+
+    usethis::use_version("minor")   # or patch/major
+    usethis::use_cran_comments()
+    usethis::use_release_issue()    # checklist on GitHub
+    devtools::check()
+    # After tagging and pushing:
+    usethis::use_github_release()

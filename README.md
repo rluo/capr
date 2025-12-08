@@ -8,9 +8,9 @@ R package for implementing the algorithms in the CAP [paper](https://doi.org/10.
 ## Current Focus (Version 0.2)
 
 *  Implement core functionality using Armadillo and C++ 17
-   *  [ ] Core CAP regression with and without orthogonality constraints
+   *  [X] Core CAP regression with and without orthogonality constraints
    *  [ ] S3 print and summary mehtods
-   *  [ ] Improved component effects removal method
+   *  [X] Improved component effects removal method
 
 
 ## Future Releases
@@ -25,6 +25,7 @@ R package for implementing the algorithms in the CAP [paper](https://doi.org/10.
     devtools::document()
     devtools::install()
     devtools::check()
+
 
 # Development environment setup
 

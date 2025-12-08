@@ -78,6 +78,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     }
     K <- as.integer(K)
 
+    # initialize Gamma.init: p x K and  B.init: q x K
     if (is.null(Gamma.init)) {
         Gamma.init <- matrix(stats::rnorm(p * K), nrow = p, ncol = K)
     } else {
@@ -152,5 +153,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
     rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-    list(B = B_hat, Gamma = Gamma_hat)
+    ret <- list(B = B_hat, Gamma = Gamma_hat)
+    class(ret) <- c("capr")
+    ret
 }

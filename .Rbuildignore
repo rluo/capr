@@ -7,3 +7,4 @@
 ^capr_.*\.tar\.gz$
 ^\.\.Rcheck$
 ^\.github$
+^\.lintr$

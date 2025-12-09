@@ -50,3 +50,19 @@ double log_deviation_from_diagonality_cpp(const arma::cube& S_cube,
   }
   return sum;
 }
+
+// Compute the (twice) CAP log-likelihood
+// \frac{1}{2}\sum_{i=1}^{n}\Bigl(\mathbf{x}_{i}^{\top}\boldsymbol{\beta}\Bigr)\,T_{i}\;+\;\frac{1}{2}\sum_{i=1}^{n}\boldsymbol{\gamma}^{\top}\mathbf{S}_{i}^{(k)}\boldsymbol{\gamma}\;\exp\!\bigl(-\mathbf{x}_{i}^{\top}\boldsymbol{\beta}\bigr)
+// [[Rcpp::export(name = "cap_loglike_cpp")]]
+double cap_loglike_cpp(const arma::cube& S_cube, const arma::mat& X,
+                       const arma::vec& T, const arma::vec& beta,
+                       const arma::vec& gamma) {
+  size_t n = S_cube.n_slices;
+  double loglike = 0.0;
+  arma::vec XB = X * beta;  // n x 1
+  for (size_t i = 0; i < n; ++i) {
+    arma::mat BTAB = gamma.t() * S_cube.slice(i) * gamma;
+    loglike += XB[i] * T[i] + BTAB(0, 0) * std::exp(-XB[i]);
+  }
+  return loglike;
+}

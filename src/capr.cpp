@@ -14,10 +14,11 @@ using OptGamma = std::optional<std::reference_wrapper<const arma::mat>>;
 struct CAPResult {
   arma::vec beta;
   arma::vec gamma;
+  double loglike;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-//   One CAP component – flip-flop,  now returning  CAPResult
+//   One CAP component – flip-flop,    returning  CAPResult
 // ─────────────────────────────────────────────────────────────────────────────
 
 static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
@@ -66,7 +67,9 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
       break;
   }
 
-  return {std::move(beta), std::move(gamma)};  // NRVO
+  double loglike = cap_loglike_cpp(S, X, T, beta, gamma);
+
+  return {std::move(beta), std::move(gamma), loglike};  // NRVO
 }
 
 // [[Rcpp::export]]
@@ -79,7 +82,8 @@ Rcpp::List CAP_one_component_unconstrained(const arma::cube& S,
                                          max_iter, tol);
 
   return Rcpp::List::create(Rcpp::Named("beta") = res.beta,
-                            Rcpp::Named("gamma") = res.gamma);
+                            Rcpp::Named("gamma") = res.gamma,
+                            Rcpp::Named("loglike") = res.loglike);
 }
 
 // [[Rcpp::export]]
@@ -91,7 +95,8 @@ Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X,
                                          std::cref(Gamma_prev), max_iter, tol);
 
   return Rcpp::List::create(Rcpp::Named("beta") = res.beta,
-                            Rcpp::Named("gamma") = res.gamma);
+                            Rcpp::Named("gamma") = res.gamma,
+                            Rcpp::Named("loglike") = res.loglike);
 }
 
 arma::vec orthogonalise_qr(const arma::vec& gamma_k,
@@ -117,7 +122,7 @@ Rcpp::List CAP_multi_components(
 
   arma::mat Gamma(p, K, arma::fill::zeros);
   arma::mat B(q, K, arma::fill::zeros);
-
+  arma::vec loglikevec(K, arma::fill::zeros);
   for (int k = 0; k < K; ++k) {
     arma::vec beta_k = Binit.col(k);
     arma::vec gamma_k = Gammainit.col(k);
@@ -144,7 +149,9 @@ Rcpp::List CAP_multi_components(
 
     Gamma.col(k) = res.gamma;
     B.col(k) = res.beta;
+    loglikevec(k) = res.loglike;
   }
 
-  return Rcpp::List::create(Rcpp::Named("B") = B, Rcpp::Named("Gamma") = Gamma);
+  return Rcpp::List::create(Rcpp::Named("B") = B, Rcpp::Named("Gamma") = Gamma,
+                            Rcpp::Named("loglike") = loglikevec);
 }

@@ -23,12 +23,15 @@ struct CAPResult {
 
 static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
                                         const arma::vec& T,
-                                        const arma::vec& beta_init,
-                                        const arma::vec& gamma_init,
+                                        const arma::mat& beta_init,
+                                        const arma::mat& gamma_init,
                                         OptGamma opt_Gamma_prev,
                                         int max_iter = 200, double tol = 1e-6) {
-  arma::vec beta = beta_init;
-  arma::vec gamma = gamma_init;
+  //  matrix  with columns β and γ, for m different initializations
+  int max_inits = beta_init.n_cols;
+
+  arma::vec best_gamma = gamma_init.col(0) * 0;
+  arma::vec best_beta = beta_init.col(0) * 0;
 
   const arma::uword p = S.n_rows, n = S.n_slices;
 
@@ -49,35 +52,45 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   const bool has_constraints =
       opt_Gamma_prev && opt_Gamma_prev->get().n_cols > 0;
 
-  for (int it = 0; it < max_iter; ++it) {
-    arma::vec beta_old = beta, gamma_old = gamma;
+  double best_loglike = arma::datum::inf;
+  for (int itinit = 0; itinit < max_inits; ++itinit) {
+    arma::vec beta = beta_init.col(itinit);
+    arma::vec gamma = gamma_init.col(itinit);
 
-    beta = newton_beta(S, X, T, beta, gamma);
+    for (int it = 0; it < max_iter; ++it) {
+      arma::vec beta_old = beta, gamma_old = gamma;
 
-    // build A(β)
-    arma::mat A(p, p, arma::fill::zeros);
-    for (arma::uword i = 0; i < n; ++i)
-      A += std::exp(-arma::dot(X.row(i), beta)) * S.slice(i);
+      beta = newton_beta(S, X, T, beta, gamma);
 
-    gamma = has_constraints ? solve_gamma(A, H, opt_Gamma_prev->get())
-                            : solve_gamma_unconstrained(A, H);
+      // build A(β)
+      arma::mat A(p, p, arma::fill::zeros);
+      for (arma::uword i = 0; i < n; ++i)
+        A += std::exp(-arma::dot(X.row(i), beta)) * S.slice(i);
 
-    if (std::max(arma::norm(beta - beta_old, "inf"),
-                 arma::norm(gamma - gamma_old, "inf")) < tol)
-      break;
+      gamma = has_constraints ? solve_gamma(A, H, opt_Gamma_prev->get())
+                              : solve_gamma_unconstrained(A, H);
+
+      if (std::max(arma::norm(beta - beta_old, "inf"),
+                   arma::norm(gamma - gamma_old, "inf")) < tol)
+        break;
+    }
+
+    double loglike = cap_loglike_cpp(S, X, T, beta, gamma);
+
+    if (loglike < best_loglike) {
+      best_loglike = loglike;
+      best_beta = beta;
+      best_gamma = gamma;
+    }
   }
-
-  double loglike = cap_loglike_cpp(S, X, T, beta, gamma);
-
-  return {std::move(beta), std::move(gamma), loglike};  // NRVO
+  return {std::move(best_beta), std::move(best_gamma), best_loglike};  // NRVO
 }
 
 // [[Rcpp::export]]
-Rcpp::List CAP_one_component_unconstrained(const arma::cube& S,
-                                           const arma::mat& X,
-                                           const arma::vec& T, arma::vec beta0,
-                                           arma::vec gamma0, int max_iter = 200,
-                                           double tol = 1e-6) {
+Rcpp::List CAP_one_component_unconstrained(
+    const arma::cube& S, const arma::mat& X, const arma::vec& T,
+    const arma::mat beta0, const arma::mat gamma0, int max_iter = 200,
+    double tol = 1e-6) {
   CAPResult res = CAP_one_component_core(S, X, T, beta0, gamma0, std::nullopt,
                                          max_iter, tol);
 
@@ -88,9 +101,10 @@ Rcpp::List CAP_one_component_unconstrained(const arma::cube& S,
 
 // [[Rcpp::export]]
 Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X,
-                             const arma::vec& T, arma::vec beta0,
-                             arma::vec gamma0, const arma::mat& Gamma_prev,
-                             int max_iter = 200, double tol = 1e-6) {
+                             const arma::vec& T, const arma::mat beta0,
+                             const arma::mat gamma0,
+                             const arma::mat& Gamma_prev, int max_iter = 200,
+                             double tol = 1e-6) {
   CAPResult res = CAP_one_component_core(S, X, T, beta0, gamma0,
                                          std::cref(Gamma_prev), max_iter, tol);
 
@@ -115,17 +129,18 @@ arma::vec orthogonalise_qr(const arma::vec& gamma_k,
 // [[Rcpp::export]]
 Rcpp::List CAP_multi_components(
     const arma::cube& S, const arma::mat& X, const arma::vec& T, const int K,
-    const arma::mat& Binit, const arma::mat& Gammainit, const bool orth = true,
-    const int max_iter = 200, const double tol = 1e-6) {
+    const arma::cube& Binit, const arma::cube& Gammainit,
+    const bool orth = true, const int max_iter = 200, const double tol = 1e-6) {
+  // Binit and Gammainit are  variable x  initializations x components
   const arma::uword p = S.n_rows;
   const arma::uword q = X.n_cols;
 
-  arma::mat Gamma(p, K, arma::fill::zeros);
-  arma::mat B(q, K, arma::fill::zeros);
-  arma::vec loglikevec(K, arma::fill::zeros);
+  arma::mat Gamma(p, K, arma::fill::zeros);   // p × K
+  arma::mat B(q, K, arma::fill::zeros);       // q × K
+  arma::vec loglikevec(K, arma::datum::inf);  // K × 1
   for (int k = 0; k < K; ++k) {
-    arma::vec beta_k = Binit.col(k);
-    arma::vec gamma_k = Gammainit.col(k);
+    arma::mat beta_k = Binit.slice(k);       // q x m
+    arma::mat gamma_k = Gammainit.slice(k);  // p x m
 
     arma::cube S_current = S;
     OptGamma gamma_prev_opt = std::nullopt;
@@ -139,7 +154,10 @@ Rcpp::List CAP_multi_components(
       S_current = rank_complete_s(S, X, Gprev, Bprev);
 
       if (orth) {
-        gamma_k = orthogonalise_qr(gamma_k, Gprev);
+        for (arma::uword init_idx = 0; init_idx < gamma_k.n_cols; ++init_idx) {
+          gamma_k.col(init_idx) =
+              orthogonalise_qr(gamma_k.col(init_idx), Gprev);
+        }
         gamma_prev_opt = std::cref(Gprev);
       }
     }

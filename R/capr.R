@@ -8,13 +8,13 @@
 #' @param S Numeric 3D array of size \eqn{p \times p \times n} (stack of covariance matrices).
 #' @param X Numeric matrix \eqn{n \times q} (design matrix).
 #' @param weight Numeric vector of length \eqn{n} (default rep(1, n)).
-#' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times k}} (default random Gaussian matrix).
-#' @param B.init Initial value of coefficient \eqn{B \in R^{q \times K}} (default zero matrix).
+#' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian cube or array).
+#' @param B.init Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero cube or array).
 #' @param K Integer scalar, number of components (\eqn{K \ge 1}).
 #' @param max_iter Integer scalar, max flip–flop iterations per component (default 200).
 #' @param tol Positive numeric scalar, convergence tolerance (default 1e-6).
 #' @param orth Logical scalar; if TRUE (default), enforce orthogonality of successive \eqn{\gamma}.
-#'
+#' @param n.init Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are set properly, n.init is ignored.
 #' @return A list with:
 #' \item{B}{numeric matrix \eqn{q \times K}, column \eqn{k} stores \eqn{\beta^{(k)}}}
 #' \item{Gamma}{numeric matrix \eqn{p \times K}, column \eqn{k} stores \eqn{\gamma^{(k)}}}
@@ -50,7 +50,7 @@
 #' }
 #' @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 #' @export
-capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_iter = 200L, tol = 1e-6, orth = TRUE, n.init = NULL) {
+capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_iter = 200L, tol = 1e-6, orth = TRUE, n.init = 10L) {
     # ---- type checks ----
     # S: numeric p x p x n
     if (!is.array(S) || length(dim(S)) != 3L || !is.numeric(S)) {
@@ -78,18 +78,26 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     }
     K <- as.integer(K)
 
+    ## check  if B.init and Gamma.init are properly specifieed
+    if (!is.null(B.init) && !is.null(Gamma.init)) {
+        if (is.numeric(B.init) && is.numeric(Gamma.init))&& dim(B.init)[3L] == dim(Gamma.init)[3L] &&
+ 
+           dim(B.init)[2L] == dim(Gamma.init)[2L]  ) {
+            n.init <- dim(B.init)[2L]
+        } else {
+            stop("If both `B.init` and `Gamma.init` are specified, they must be numeric arrays of shape (q x n.init x K) and (p x n.init x K), respectively.", call. = FALSE)
+        }
 
-    repeatn <- TRUE
-    if (is.null(n.init)) {
-        n.init <- 1
-        repeatn <- FALSE
     } else {
-        n.init <- as.integer(n.init)
+        if (!is.null(n.init)) {
+             B.init <- array(rnorm(q * K * n.init), dim = c(q, n.init, K))
+             Gamma.init <- array(rnorm(p * K * n.init), dim = c(p, n.init, K))   
+        } else {
+            stop("If `B.init` and `Gamma.init` are not both specified, `n.init` must be provided.", call. = FALSE)
+        }
     }
 
-    BHatArr <- array(0, dim = c(q, K, n.init))
-    GammaHatArr <- array(0, dim = c(p, K, n.init))
-    for (init_idx in seq_len(n.init)) {
+ 
         # initialize Gamma.init: p x K and  B.init: q x K
         if (is.null(Gamma.init) || repeatn) {
             Gamma.init <- matrix(stats::rnorm(p * K), nrow = p, ncol = K)
@@ -158,7 +166,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
         Gamma_hat <- cap_fit$Gamma
         BHatArr[, , init_idx] <- B_hat
         GammaHatArr[, , init_idx] <- Gamma_hat
-    }
+ 
 
 
     if (!is.null(colnames(X))) {

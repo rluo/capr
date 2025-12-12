@@ -5,6 +5,8 @@
         "functional": "cpp",
         "tuple": "cpp",
         "utility": "cpp",
-        "optional": "cpp"
+        "optional": "cpp",
+        "random": "cpp",
+        "cmath": "cpp"
     }
 }

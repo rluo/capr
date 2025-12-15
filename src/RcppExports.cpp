@@ -93,6 +93,23 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// newton_beta
+static arma::vec newton_beta(const arma::cube& S, const arma::mat& X, const arma::vec& T, const arma::vec& beta_init, const arma::vec& gamma, int max_iter, double tol);
+RcppExport SEXP _capr_newton_beta(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta_initSEXP, SEXP gammaSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta_init(beta_initSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    rcpp_result_gen = Rcpp::wrap(newton_beta(S, X, T, beta_init, gamma, max_iter, tol));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cosine_similarity_cpp
 double cosine_similarity_cpp(const arma::vec& a, const arma::vec& b, double eps);
 RcppExport SEXP _capr_cosine_similarity_cpp(SEXP aSEXP, SEXP bSEXP, SEXP epsSEXP) {
@@ -141,6 +158,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_capr_CAP_one_component_unconstrained", (DL_FUNC) &_capr_CAP_one_component_unconstrained, 7},
     {"_capr_CAP_one_component", (DL_FUNC) &_capr_CAP_one_component, 8},
     {"_capr_CAP_multi_components", (DL_FUNC) &_capr_CAP_multi_components, 9},
+    {"_capr_newton_beta", (DL_FUNC) &_capr_newton_beta, 7},
     {"_capr_cosine_similarity_cpp", (DL_FUNC) &_capr_cosine_similarity_cpp, 3},
     {"_capr_log_deviation_from_diagonality_cpp", (DL_FUNC) &_capr_log_deviation_from_diagonality_cpp, 3},
     {"_capr_cap_loglike_cpp", (DL_FUNC) &_capr_cap_loglike_cpp, 5},

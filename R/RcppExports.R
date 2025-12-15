@@ -21,6 +21,10 @@ CAP_multi_components <- function(S, X, T, K, Binit, Gammainit, orth = TRUE, max_
     .Call(`_capr_CAP_multi_components`, S, X, T, K, Binit, Gammainit, orth, max_iter, tol)
 }
 
+newton_beta <- function(S, X, T, beta_init, gamma, max_iter = 1L, tol = 1e-6) {
+    .Call(`_capr_newton_beta`, S, X, T, beta_init, gamma, max_iter, tol)
+}
+
 #' Cosine similarity between two vectors
 #'
 #' Computes the cosine of the angle between \code{a} and \code{b}. Both

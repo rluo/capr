@@ -20,7 +20,6 @@ struct CAPResult {
 // ─────────────────────────────────────────────────────────────────────────────
 //   One CAP component – flip-flop,    returning  CAPResult
 // ─────────────────────────────────────────────────────────────────────────────
-
 static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
                                         const arma::vec& T,
                                         const arma::mat& beta_init,
@@ -43,7 +42,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   for (arma::uword i = 0; i < n; ++i) H += S.slice(i);
   H /= static_cast<double>(n);
 
-  for (arma::uword i = 0; i < p; ++i) {
+  for (arma::uword i = 0; i < gamma_work.n_cols; ++i) {
     arma::vec gamma = gamma_work.col(i);
 
     // normalize to H  norm = 1
@@ -144,9 +143,9 @@ Rcpp::List CAP_multi_components(
   const arma::uword p = S.n_rows;
   const arma::uword q = X.n_cols;
 
-  arma::mat Gamma(p, K, arma::fill::zeros);   // p × K
-  arma::mat B(q, K, arma::fill::zeros);       // q × K
-  arma::vec loglikevec(K);  // K × 1
+  arma::mat Gamma(p, K, arma::fill::zeros);  // p × K
+  arma::mat B(q, K, arma::fill::zeros);      // q × K
+  arma::vec loglikevec(K);                   // K × 1
   loglikevec.fill(arma::datum::inf);
   for (int k = 0; k < K; ++k) {
     arma::mat beta_k = Binit.slice(k);       // q x m

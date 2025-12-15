@@ -146,7 +146,8 @@ Rcpp::List CAP_multi_components(
 
   arma::mat Gamma(p, K, arma::fill::zeros);   // p × K
   arma::mat B(q, K, arma::fill::zeros);       // q × K
-  arma::vec loglikevec(K, arma::datum::inf);  // K × 1
+  arma::vec loglikevec(K);  // K × 1
+  loglikevec.fill(arma::datum::inf);
   for (int k = 0; k < K; ++k) {
     arma::mat beta_k = Binit.slice(k);       // q x m
     arma::mat gamma_k = Gammainit.slice(k);  // p x m

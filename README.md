@@ -23,6 +23,7 @@ R package for implementing the algorithms in the CAP [paper](https://doi.org/10.
 # Package build
 
     devtools::document()
+    devtools::test()
     devtools::install()
     devtools::check()
 

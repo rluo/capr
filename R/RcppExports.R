@@ -41,3 +41,7 @@ log_deviation_from_diagonality_cpp <- function(S_cube, nval, B) {
     .Call(`_capr_log_deviation_from_diagonality_cpp`, S_cube, nval, B)
 }
 
+cap_loglike_cpp <- function(S_cube, X, T, beta, gamma) {
+    .Call(`_capr_cap_loglike_cpp`, S_cube, X, T, beta, gamma)
+}
+

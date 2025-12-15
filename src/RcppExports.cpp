@@ -40,7 +40,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // CAP_one_component_unconstrained
-Rcpp::List CAP_one_component_unconstrained(const arma::cube& S, const arma::mat& X, const arma::vec& T, arma::vec beta0, arma::vec gamma0, int max_iter, double tol);
+Rcpp::List CAP_one_component_unconstrained(const arma::cube& S, const arma::mat& X, const arma::vec& T, const arma::mat beta0, const arma::mat gamma0, int max_iter, double tol);
 RcppExport SEXP _capr_CAP_one_component_unconstrained(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta0SEXP, SEXP gamma0SEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -48,8 +48,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta0(beta0SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type gamma0(gamma0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type gamma0(gamma0SEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
     rcpp_result_gen = Rcpp::wrap(CAP_one_component_unconstrained(S, X, T, beta0, gamma0, max_iter, tol));
@@ -57,7 +57,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // CAP_one_component
-Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X, const arma::vec& T, arma::vec beta0, arma::vec gamma0, const arma::mat& Gamma_prev, int max_iter, double tol);
+Rcpp::List CAP_one_component(const arma::cube& S, const arma::mat& X, const arma::vec& T, const arma::mat beta0, const arma::mat gamma0, const arma::mat& Gamma_prev, int max_iter, double tol);
 RcppExport SEXP _capr_CAP_one_component(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta0SEXP, SEXP gamma0SEXP, SEXP Gamma_prevSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -65,8 +65,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type beta0(beta0SEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type gamma0(gamma0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type beta0(beta0SEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type gamma0(gamma0SEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type Gamma_prev(Gamma_prevSEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
@@ -75,7 +75,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // CAP_multi_components
-Rcpp::List CAP_multi_components(const arma::cube& S, const arma::mat& X, const arma::vec& T, const int K, const arma::mat& Binit, const arma::mat& Gammainit, const bool orth, const int max_iter, const double tol);
+Rcpp::List CAP_multi_components(const arma::cube& S, const arma::mat& X, const arma::vec& T, const int K, const arma::cube& Binit, const arma::cube& Gammainit, const bool orth, const int max_iter, const double tol);
 RcppExport SEXP _capr_CAP_multi_components(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP KSEXP, SEXP BinitSEXP, SEXP GammainitSEXP, SEXP orthSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -84,8 +84,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
     Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
     Rcpp::traits::input_parameter< const int >::type K(KSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Binit(BinitSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type Gammainit(GammainitSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Binit(BinitSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type Gammainit(GammainitSEXP);
     Rcpp::traits::input_parameter< const bool >::type orth(orthSEXP);
     Rcpp::traits::input_parameter< const int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< const double >::type tol(tolSEXP);
@@ -119,6 +119,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cap_loglike_cpp
+double cap_loglike_cpp(const arma::cube& S_cube, const arma::mat& X, const arma::vec& T, const arma::vec& beta, const arma::vec& gamma);
+RcppExport SEXP _capr_cap_loglike_cpp(SEXP S_cubeSEXP, SEXP XSEXP, SEXP TSEXP, SEXP betaSEXP, SEXP gammaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::cube& >::type S_cube(S_cubeSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type X(XSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type T(TSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< const arma::vec& >::type gamma(gammaSEXP);
+    rcpp_result_gen = Rcpp::wrap(cap_loglike_cpp(S_cube, X, T, beta, gamma));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_capr_FG_cpp", (DL_FUNC) &_capr_FG_cpp, 4},
@@ -128,6 +143,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_capr_CAP_multi_components", (DL_FUNC) &_capr_CAP_multi_components, 9},
     {"_capr_cosine_similarity_cpp", (DL_FUNC) &_capr_cosine_similarity_cpp, 3},
     {"_capr_log_deviation_from_diagonality_cpp", (DL_FUNC) &_capr_log_deviation_from_diagonality_cpp, 3},
+    {"_capr_cap_loglike_cpp", (DL_FUNC) &_capr_cap_loglike_cpp, 5},
     {NULL, NULL, 0}
 };
 

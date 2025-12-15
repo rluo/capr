@@ -32,6 +32,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
 
   arma::vec best_gamma = gamma_init.col(0) * 0;
   arma::vec best_beta = beta_init.col(0) * 0;
+  double best_loglike = arma::datum::inf;
 
   const arma::uword p = S.n_rows, n = S.n_slices;
 
@@ -40,19 +41,25 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   for (arma::uword i = 0; i < n; ++i) H += S.slice(i);
   H /= static_cast<double>(n);
 
-  // normalize to H  norm = 1
-  // --- current quadratic form  γᵀ H γ  -----------------------------------
-  const double qf = arma::as_scalar(gamma.t() * H * gamma);
+  for (arma::uword i = 0; i < p; ++i) {
+    arma::vec gamma = gamma_init.col(i);
 
-  if (qf <= tol) Rcpp::stop("gamma has (near-)zero H-norm — cannot normalise");
+    // normalize to H  norm = 1
+    // --- current quadratic form  γᵀ H γ  -----------------------------------
+    const double qf = arma::as_scalar(gamma.t() * H * gamma);
 
-  // --- scale γ so that  γᵀ H γ = 1  ---------------------------------------
-  gamma /= std::sqrt(qf);
+    if (qf <= tol)
+      Rcpp::stop("gamma has (near-)zero H-norm — cannot normalise");
+
+    // --- scale γ so that  γᵀ H γ = 1  ---------------------------------------
+    gamma /= std::sqrt(qf);
+
+    gamma_init.col(i) = gamma;
+  }
 
   const bool has_constraints =
       opt_Gamma_prev && opt_Gamma_prev->get().n_cols > 0;
 
-  double best_loglike = arma::datum::inf;
   for (int itinit = 0; itinit < max_inits; ++itinit) {
     arma::vec beta = beta_init.col(itinit);
     arma::vec gamma = gamma_init.col(itinit);

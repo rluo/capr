@@ -94,7 +94,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // newton_beta
-static arma::vec newton_beta(const arma::cube& S, const arma::mat& X, const arma::vec& T, const arma::vec& beta_init, const arma::vec& gamma, int max_iter, double tol);
+arma::vec newton_beta(const arma::cube& S, const arma::mat& X, const arma::vec& T, const arma::vec& beta_init, const arma::vec& gamma, int max_iter, double tol);
 RcppExport SEXP _capr_newton_beta(SEXP SSEXP, SEXP XSEXP, SEXP TSEXP, SEXP beta_initSEXP, SEXP gammaSEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

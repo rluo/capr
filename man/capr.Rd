@@ -13,7 +13,8 @@ capr(
   weight = NULL,
   max_iter = 200L,
   tol = 1e-06,
-  orth = TRUE
+  orth = TRUE,
+  n.init = 10L
 )
 }
 \arguments{
@@ -23,17 +24,19 @@ capr(
 
 \item{K}{Integer scalar, number of components (\eqn{K \ge 1}).}
 
-\item{B.init}{Initial value of coefficient \eqn{B \in R^{q \times K}} (default zero matrix).}
+\item{B.init}{Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero cube or array).}
 
-\item{Gamma.init}{Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times k}} (default random Gaussian matrix).}
+\item{Gamma.init}{Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian cube or array).}
 
-\item{weight}{Numeric vector of length \eqn{n} (default rep(1, n)).}
+\item{weight}{Numeric vector of length \eqn{n} (default rep(T, n)), where T should be the sample size for each \eqn{S_i}.}
 
 \item{max_iter}{Integer scalar, max flip–flop iterations per component (default 200).}
 
 \item{tol}{Positive numeric scalar, convergence tolerance (default 1e-6).}
 
 \item{orth}{Logical scalar; if TRUE (default), enforce orthogonality of successive \eqn{\gamma}.}
+
+\item{n.init}{Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are set properly, n.init is ignored.}
 }
 \value{
 A list with:

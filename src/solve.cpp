@@ -1,0 +1,33 @@
+#include <RcppArmadillo.h>
+
+// ─────────────────────────────────────────────────────────────────────────────
+//  β–STEP  (one Newton / Fisher like scoring update)
+// ─────────────────────────────────────────────────────────────────────────────
+//[[Rcpp::export]]
+arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
+                      const arma::vec& T, const arma::vec& beta_init,
+                      const arma::vec& gamma, int max_iter = 1,
+                      double tol = 1e-6) {
+  const arma::uword n = S.n_slices;
+  arma::vec beta = beta_init;
+  for (int it = 0; it < max_iter; ++it) {
+    arma::mat Hbeta(beta.n_elem, beta.n_elem, arma::fill::zeros);
+    arma::vec g(beta.n_elem, arma::fill::zeros);
+    for (arma::uword i = 0; i < n; ++i) {
+      double eta = arma::dot(X.row(i), beta);
+      double wi =
+          std::exp(-eta) * arma::as_scalar(gamma.t() * S.slice(i) * gamma);
+      arma::vec xi = X.row(i).t();
+      Hbeta += wi * (xi * xi.t());
+      g += (T[i] - wi) * xi;
+    }
+
+    arma::vec delta = arma::solve(
+        Hbeta, g, arma::solve_opts::fast + arma::solve_opts::likely_sympd);
+    beta -= delta;
+    if (arma::norm(delta, "inf") < tol) {
+      break;
+    }
+  }
+  return beta;
+}

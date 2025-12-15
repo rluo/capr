@@ -30,6 +30,8 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   //  matrix  with columns β and γ, for m different initializations
   int max_inits = beta_init.n_cols;
 
+  arma::mat gamma_work = gamma_init;  // copy, so we can normalise columns
+
   arma::vec best_gamma = gamma_init.col(0) * 0;
   arma::vec best_beta = beta_init.col(0) * 0;
   double best_loglike = arma::datum::inf;
@@ -42,7 +44,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   H /= static_cast<double>(n);
 
   for (arma::uword i = 0; i < p; ++i) {
-    arma::vec gamma = gamma_init.col(i);
+    arma::vec gamma = gamma_work.col(i);
 
     // normalize to H  norm = 1
     // --- current quadratic form  γᵀ H γ  -----------------------------------
@@ -54,7 +56,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
     // --- scale γ so that  γᵀ H γ = 1  ---------------------------------------
     gamma /= std::sqrt(qf);
 
-    gamma_init.col(i) = gamma;
+    gamma_work.col(i) = gamma;
   }
 
   const bool has_constraints =
@@ -62,7 +64,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
 
   for (int itinit = 0; itinit < max_inits; ++itinit) {
     arma::vec beta = beta_init.col(itinit);
-    arma::vec gamma = gamma_init.col(itinit);
+    arma::vec gamma = gamma_work.col(itinit);
 
     for (int it = 0; it < max_iter; ++it) {
       arma::vec beta_old = beta, gamma_old = gamma;

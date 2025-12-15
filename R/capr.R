@@ -80,94 +80,68 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
 
     ## check  if B.init and Gamma.init are properly specifieed
     if (!is.null(B.init) && !is.null(Gamma.init)) {
-        if (is.numeric(B.init) && is.numeric(Gamma.init))&& dim(B.init)[3L] == dim(Gamma.init)[3L] &&
- 
-           dim(B.init)[2L] == dim(Gamma.init)[2L]  ) {
+        if (is.numeric(B.init) && is.numeric(Gamma.init) && dim(B.init)[3L] == dim(Gamma.init)[3L] &&
+            dim(B.init)[2L] == dim(Gamma.init)[2L]) {
             n.init <- dim(B.init)[2L]
+            if (length(B.init) != q * n.init * K || length(Gamma.init) != p * n.init * K) {
+                stop("If both `B.init` and `Gamma.init` are specified, they must be numeric arrays of shape (q x n.init x K) and (p x n.init x K), respectively.", call. = FALSE)
+            }
+            B.init <- array(B.init, dim = c(q, n.init, K))
+            Gamma.init <- array(Gamma.init, dim = c(p, n.init, K))
         } else {
             stop("If both `B.init` and `Gamma.init` are specified, they must be numeric arrays of shape (q x n.init x K) and (p x n.init x K), respectively.", call. = FALSE)
         }
-
     } else {
         if (!is.null(n.init)) {
-             B.init <- array(rnorm(q * K * n.init), dim = c(q, n.init, K))
-             Gamma.init <- array(rnorm(p * K * n.init), dim = c(p, n.init, K))   
+            B.init <- array(rnorm(q * K * n.init), dim = c(q, n.init, K))
+            Gamma.init <- array(rnorm(p * K * n.init), dim = c(p, n.init, K))
         } else {
             stop("If `B.init` and `Gamma.init` are not both specified, `n.init` must be provided.", call. = FALSE)
         }
     }
 
- 
-        # initialize Gamma.init: p x K and  B.init: q x K
-        if (is.null(Gamma.init) || repeatn) {
-            Gamma.init <- matrix(stats::rnorm(p * K), nrow = p, ncol = K)
-        } else {
-            if (is.numeric(Gamma.init) && is.null(dim(Gamma.init)) && length(Gamma.init) == p * K) {
-                Gamma.init <- matrix(Gamma.init, nrow = p, ncol = K)
-            }
-            if (!is.matrix(Gamma.init) || !identical(dim(Gamma.init), c(p, K)) || !is.numeric(Gamma.init)) {
-                stop("`Gamma.init` must be NULL, a numeric matrix of size p x K, or a numeric vector of length p*K.", call. = FALSE)
-            }
-        }
-        storage.mode(Gamma.init) <- "double"
+    storage.mode(B.init) <- "double"
+    storage.mode(Gamma.init) <- "double"
+    if (is.null(weight)) weight <- rep(1, n)
+    # weight: numeric vector length n
+    if (!is.numeric(weight) || is.matrix(weight) || length(weight) != n) {
+        stop(sprintf("`weight` must be a numeric vector of length n (= %d).", n), call. = FALSE)
+    }
+    weight <- as.numeric(weight)
+    if (any(!is.finite(weight))) {
+        stop("`weight` must contain only finite values.", call. = FALSE)
+    }
 
 
-        if (is.null(B.init) || repeatn) {
-            B.init <- matrix(0, nrow = q, ncol = K)
-        } else {
-            if (is.numeric(B.init) && is.null(dim(B.init)) && length(B.init) == q * K) {
-                B.init <- matrix(B.init, nrow = q, ncol = K)
-            }
-            if (!is.matrix(B.init) || !identical(dim(B.init), c(q, K)) || !is.numeric(B.init)) {
-                stop("`B.init` must be NULL, a numeric matrix of size q x K, or a numeric vector of length q*K.", call. = FALSE)
-            }
-        }
-        storage.mode(B.init) <- "double"
+    if (length(max_iter) != 1L || !is.numeric(max_iter) || is.na(max_iter) ||
+        max_iter < 1 || max_iter != as.integer(max_iter)) {
+        stop("`max_iter` must be a single positive integer.", call. = FALSE)
+    }
+    max_iter <- as.integer(max_iter)
 
+    if (length(tol) != 1L || !is.numeric(tol) || is.na(tol) || tol <= 0) {
+        stop("`tol` must be a single positive number (> 0).", call. = FALSE)
+    }
 
-        if (is.null(weight)) weight <- rep(1, n)
-        # weight: numeric vector length n
-        if (!is.numeric(weight) || is.matrix(weight) || length(weight) != n) {
-            stop(sprintf("`weight` must be a numeric vector of length n (= %d).", n), call. = FALSE)
-        }
-        weight <- as.numeric(weight)
-        if (any(!is.finite(weight))) {
-            stop("`weight` must contain only finite values.", call. = FALSE)
-        }
+    if (length(orth) != 1L || !is.logical(orth) || is.na(orth)) {
+        stop("`orth` must be a single logical (TRUE/FALSE).", call. = FALSE)
+    }
 
+    cap_fit <- CAP_multi_components(
+        S = S,
+        X = X,
+        T = weight,
+        K = K,
+        Binit = B.init,
+        Gammainit = Gamma.init,
+        orth = orth,
+        max_iter = max_iter,
+        tol = tol
+    )
 
-        if (length(max_iter) != 1L || !is.numeric(max_iter) || is.na(max_iter) ||
-            max_iter < 1 || max_iter != as.integer(max_iter)) {
-            stop("`max_iter` must be a single positive integer.", call. = FALSE)
-        }
-        max_iter <- as.integer(max_iter)
-
-        if (length(tol) != 1L || !is.numeric(tol) || is.na(tol) || tol <= 0) {
-            stop("`tol` must be a single positive number (> 0).", call. = FALSE)
-        }
-
-        if (length(orth) != 1L || !is.logical(orth) || is.na(orth)) {
-            stop("`orth` must be a single logical (TRUE/FALSE).", call. = FALSE)
-        }
-
-        cap_fit <- CAP_multi_components(
-            S = S,
-            X = X,
-            T = weight,
-            K = K,
-            Binit = B.init,
-            Gammainit = Gamma.init,
-            orth = orth,
-            max_iter = max_iter,
-            tol = tol
-        )
-
-        B_hat <- cap_fit$B
-        Gamma_hat <- cap_fit$Gamma
-        BHatArr[, , init_idx] <- B_hat
-        GammaHatArr[, , init_idx] <- Gamma_hat
- 
-
+    B_hat <- cap_fit$B
+    Gamma_hat <- cap_fit$Gamma
+    loglikevec <- cap_fit$loglike
 
     if (!is.null(colnames(X))) {
         rownames(B_hat) <- colnames(X)
@@ -176,7 +150,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
     rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-    ret <- list(B = B_hat, Gamma = Gamma_hat)
+    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec)
     class(ret) <- c("capr")
     ret
 }

@@ -7,7 +7,7 @@
 #'
 #' @param S Numeric 3D array of size \eqn{p \times p \times n} (stack of covariance matrices).
 #' @param X Numeric matrix \eqn{n \times q} (design matrix).
-#' @param weight Numeric vector of length \eqn{n} (default rep(1, n)).
+#' @param weight Numeric vector of length \eqn{n} (default rep(T, n)), where T should be the sample size for each \eqn{S_i}.
 #' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian cube or array).
 #' @param B.init Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero cube or array).
 #' @param K Integer scalar, number of components (\eqn{K \ge 1}).

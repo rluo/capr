@@ -1,42 +1,3 @@
-project_component_variance <- function(S_cube, gamma) {
-    vapply(
-        seq_len(dim(S_cube)[3L]),
-        function(i) {
-            as.numeric(crossprod(gamma, S_cube[, , i] %*% gamma))
-        },
-        numeric(1L)
-    )
-}
-
-solve_beta_fixed_gamma <- function(y, X, weight, beta_start, max_iter, tol) {
-    beta <- beta_start
-    for (iter in seq_len(max_iter)) {
-        eta <- as.vector(X %*% beta)
-        wi <- exp(-eta) * y
-        wi[!is.finite(wi) | wi <= 0] <- .Machine$double.eps
-        g <- crossprod(X, weight - wi)
-        WX <- sqrt(wi) * X
-        H <- crossprod(WX)
-        step <- solve_symmetric(H, g)
-        beta_new <- beta - step
-        if (max(abs(beta_new - beta)) < tol) {
-            beta <- beta_new
-            break
-        }
-        beta <- beta_new
-    }
-    beta
-}
-
-solve_symmetric <- function(H, g) {
-    chol_attempt <- tryCatch(chol(H), error = function(e) NULL)
-    if (!is.null(chol_attempt)) {
-        return(backsolve(chol_attempt, forwardsolve(t(chol_attempt), g)))
-    }
-    qr.solve(H, g)
-}
-
-
 #' Bootstrap confidence intervals for CAP coefficients
 #'
 #' Generates bootstrap replicates of the CAP regression coefficients while
@@ -66,9 +27,9 @@ solve_symmetric <- function(H, g) {
 #' \item{level}{The requested confidence level.}
 #'
 #' @export
-capr_bootstrap <- function(S, X, fit, nboot = 200L, weight = NULL,
-                           level = 0.95, max_iter = 50L, tol = 1e-6,
-                           seed = NULL) {
+capr.boot <- function(S, X, fit, nboot = 1000L, weight = NULL,
+                      level = 0.95, max_iter = 50L, tol = 1e-6,
+                      seed = NULL) {
     if (!inherits(fit, "capr")) {
         stop("`fit` must be an object returned by `capr()`.", call. = FALSE)
     }
@@ -106,34 +67,34 @@ capr_bootstrap <- function(S, X, fit, nboot = 200L, weight = NULL,
         stop("`weight` must be numeric.", call. = FALSE)
     }
 
-    samples <- array(NA_real_, dim = c(q, K, nboot),
-                     dimnames = list(rownames(fit$B), colnames(fit$B), NULL))
+
+    beta_all <- array(0, dim = c(q, K, nboot))
 
     for (b in seq_len(nboot)) {
         idx <- sample.int(n, n, replace = TRUE)
-        S_boot <- S[, , idx, drop = FALSE]
-        X_boot <- X[idx, , drop = FALSE]
-        w_boot <- weight[idx]
 
         for (k in seq_len(K)) {
-            gamma_k <- Gamma_hat[, k]
+            X_boot <- X[idx, , drop = FALSE]
+            w_boot <- weight[idx]
             beta_start <- fit$B[, k]
-            y_proj <- project_component_variance(S_boot, gamma_k)
-            beta_hat <- solve_beta_fixed_gamma(
-                y = y_proj,
+            beta_hat <- newton_beta(
+                S = S[, , idx],
                 X = X_boot,
-                weight = w_boot,
-                beta_start = beta_start,
+                T = w_boot,
+                beta_init = beta_start,
+                gamma = Gamma_hat[, k],
                 max_iter = max_iter,
                 tol = tol
             )
-            samples[, k, b] <- beta_hat
+            beta_all[, k, b] <- beta_hat
         }
     }
 
     alpha <- 1 - level
-    lower <- apply(samples, c(1, 2), stats::quantile, probs = alpha / 2, na.rm = TRUE)
-    upper <- apply(samples, c(1, 2), stats::quantile, probs = 1 - alpha / 2, na.rm = TRUE)
+    lower <- apply(beta_all, c(1, 2), stats::quantile, probs = alpha / 2, na.rm = TRUE)
+    upper <- apply(beta_all, c(1, 2), stats::quantile, probs = 1 - alpha / 2, na.rm = TRUE)
 
-    list(samples = samples, ci_lower = lower, ci_upper = upper, level = level)
+    ret <- list(beta = apply(beta_all, c(1, 2), mean, na.rm = TRUE), ci_lower = lower, ci_upper = upper, level = level)
+    class(ret) <- "capr.boot"
+    return(ret)
 }

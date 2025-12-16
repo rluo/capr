@@ -66,3 +66,20 @@ double cap_loglike_cpp(const arma::cube& S_cube, const arma::mat& X,
   }
   return loglike;
 }
+
+// [[Rcpp::export]]
+arma::mat GtSG(const arma::mat& G, const arma::cube& S) {
+  const arma::uword p = G.n_rows;
+  const arma::uword K = G.n_cols;
+  const arma::uword n = S.n_slices;
+
+  arma::mat result(n, K, arma::fill::zeros);
+
+  for (arma::uword i = 0; i < K; ++i) {
+    arma::vec g = G.col(i);
+    for (arma::uword j = 0; j < n; ++j) {
+      result(j, i) = arma::as_scalar(g.t() * S.slice(j) * g);
+    }
+  }
+  return result;
+}

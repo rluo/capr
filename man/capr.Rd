@@ -64,23 +64,14 @@ Requires \code{CAP_one_component()} to be available. If \code{rank_complete_s()}
 defined, the input \code{S} is used as-is at each step.
 }
 \examples{
-\dontrun{
-set.seed(123)
-p <- 5
-n <- 20
-q <- 3
-K <- 2
-S <- array(0, dim = c(p, p, n))
-for (i in 1:n) {
-    A <- matrix(rnorm(p * p), p, p)
-    S[, , i] <- crossprod(A) + diag(p)
-}
-X <- matrix(rnorm(n * q), n, q)
-T <- rnorm(n)
-# define CAP_one_component() in your package; then:
-res <- capr(S, X, T, K)
-str(res)
-}
+simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+K <- 2L
+fit <- capr(
+    S = simu.data$S,
+    X = simu.data$X,
+    K = K
+)
+print(fit)
 }
 \seealso{
 \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}

@@ -6,6 +6,7 @@ test_that("capr_bootstrap produces coefficient intervals", {
         S = sim$S,
         X = sim$X,
         K = K,
+        weight = rep(1000, sim$n),
         max_iter = 150L,
         tol = 1e-7,
         orth = TRUE
@@ -15,7 +16,7 @@ test_that("capr_bootstrap produces coefficient intervals", {
         S = sim$S,
         X = sim$X,
         fit = fit,
-        nboot = 6L,
+        nboot = 10L,
         max_iter = 20L,
         tol = 1e-6,
         seed = 123L

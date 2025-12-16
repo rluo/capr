@@ -22,3 +22,13 @@ Formats the coefficient matrix \eqn{\hat{B}} returned by \code{\link[=capr]{capr
 linear-regression style table, showing the estimate for each predictor and
 component.
 }
+\examples{
+simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+K <- 2L
+fit <- capr(
+    S = simu.data$S,
+    X = simu.data$X,
+    K = K
+)
+print(fit)
+}

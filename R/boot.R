@@ -95,6 +95,6 @@ capr.boot <- function(S, X, fit, nboot = 1000L, weight = NULL,
     upper <- apply(beta_all, c(1, 2), stats::quantile, probs = 1 - alpha / 2, na.rm = TRUE)
 
     ret <- list(beta = apply(beta_all, c(1, 2), mean, na.rm = TRUE), ci_lower = lower, ci_upper = upper, level = level)
-    class(ret) <- "capr.boot"
+    class(ret) <- c("capr.boot")
     return(ret)
 }

@@ -151,6 +151,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// GtSG
+arma::mat GtSG(const arma::mat& G, const arma::cube& S);
+RcppExport SEXP _capr_GtSG(SEXP GSEXP, SEXP SSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type G(GSEXP);
+    Rcpp::traits::input_parameter< const arma::cube& >::type S(SSEXP);
+    rcpp_result_gen = Rcpp::wrap(GtSG(G, S));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_capr_FG_cpp", (DL_FUNC) &_capr_FG_cpp, 4},
@@ -162,6 +174,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_capr_cosine_similarity_cpp", (DL_FUNC) &_capr_cosine_similarity_cpp, 3},
     {"_capr_log_deviation_from_diagonality_cpp", (DL_FUNC) &_capr_log_deviation_from_diagonality_cpp, 3},
     {"_capr_cap_loglike_cpp", (DL_FUNC) &_capr_cap_loglike_cpp, 5},
+    {"_capr_GtSG", (DL_FUNC) &_capr_GtSG, 2},
     {NULL, NULL, 0}
 };
 

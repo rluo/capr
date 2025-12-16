@@ -49,3 +49,7 @@ cap_loglike_cpp <- function(S_cube, X, T, beta, gamma) {
     .Call(`_capr_cap_loglike_cpp`, S_cube, X, T, beta, gamma)
 }
 
+GtSG <- function(G, S) {
+    .Call(`_capr_GtSG`, G, S)
+}
+

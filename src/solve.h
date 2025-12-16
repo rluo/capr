@@ -1,6 +1,10 @@
 #pragma once
 #include <RcppArmadillo.h>
 
+inline arma::mat make_symmetric(const arma::mat& M) {
+  return 0.5 * (M + M.t());
+}
+
 //--------------------------------------------------------------------------
 //  γ̂  for the unconstrained case  (Γ_prev has zero columns)
 //
@@ -12,16 +16,18 @@
 static arma::vec solve_gamma_unconstrained(const arma::mat& A,
                                            const arma::mat& H) {
   // --- spectral square-root of H  ----------------------------------------
+  arma::mat Hsym = make_symmetric(H);
   arma::vec hval;
   arma::mat Hevec;
-  arma::eig_sym(hval, Hevec, H, "std");  // H = V Λ Vᵀ  (Λ>0)
+  arma::eig_sym(hval, Hevec, Hsym, "std");  // H = V Λ Vᵀ  (Λ>0)
 
   arma::mat H_half = Hevec * arma::diagmat(arma::sqrt(hval)) * Hevec.t();
   arma::mat H_invhalf =
       Hevec * arma::diagmat(1.0 / arma::sqrt(hval)) * Hevec.t();
 
   // --- ordinary eigenproblem  B ν = λ ν  ---------------------------------
-  arma::mat B = H_invhalf * A * H_invhalf;  // B symmetric
+  arma::mat Asym = make_symmetric(A);
+  arma::mat B = make_symmetric(H_invhalf * Asym * H_invhalf);  // B symmetric
   arma::vec lam;
   arma::mat V;
   arma::eig_sym(lam, V, B);     // ascending eigenvalues
@@ -29,7 +35,7 @@ static arma::vec solve_gamma_unconstrained(const arma::mat& A,
 
   // --- transform back   γ = H⁻½ ν   and normalise  γᵀHγ = 1  --------------
   arma::vec gamma = H_invhalf * nu_min;
-  gamma /= std::sqrt(arma::as_scalar(gamma.t() * H * gamma));
+  gamma /= std::sqrt(arma::as_scalar(gamma.t() * Hsym * gamma));
 
   return gamma;
 }
@@ -56,26 +62,28 @@ static arma::vec solve_gamma(
   // -------------------------------------------------------------------------
   //  Case 2  :  orthogonality w.r.t. Γ_prev  (same code as before)
   // -------------------------------------------------------------------------
+  arma::mat Hsym = make_symmetric(H);
   arma::vec eval;
   arma::mat evec;
-  arma::eig_sym(eval, evec, H, "std");  // H = V Λ Vᵀ
+  arma::eig_sym(eval, evec, Hsym, "std");  // H = V Λ Vᵀ
 
   arma::mat H_half = evec * arma::diagmat(arma::sqrt(eval)) * evec.t();
   arma::mat H_invhalf = evec * arma::diagmat(1.0 / arma::sqrt(eval)) * evec.t();
 
-  arma::mat B = H_invhalf * A * H_invhalf;  // H⁻½ A H⁻½
+  arma::mat Asym = make_symmetric(A);
+  arma::mat B = make_symmetric(H_invhalf * Asym * H_invhalf);  // H⁻½ A H⁻½
   arma::mat U = H_invhalf * Gamma_prev;     // p × (k-1)
 
   arma::mat Q = arma::null(U.t());  // p × (p-k+1)
 
-  arma::mat Bred = Q.t() * B * Q;  // reduced matrix
+  arma::mat Bred = make_symmetric(Q.t() * B * Q);  // reduced matrix
   arma::vec lam;
   arma::mat Z;
   arma::eig_sym(lam, Z, Bred, "std");
   arma::vec z_min = Z.col(0);  // smallest eigen-pair
 
   arma::vec gamma = H_invhalf * Q * z_min;
-  gamma /= std::sqrt(arma::as_scalar(gamma.t() * H * gamma));  // γᵀHγ = 1
+  gamma /= std::sqrt(arma::as_scalar(gamma.t() * Hsym * gamma));  // γᵀHγ = 1
   return gamma;
 }
 

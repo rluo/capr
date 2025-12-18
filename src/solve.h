@@ -72,7 +72,7 @@ static arma::vec solve_gamma(
 
   arma::mat Asym = make_symmetric(A);
   arma::mat B = make_symmetric(H_invhalf * Asym * H_invhalf);  // H⁻½ A H⁻½
-  arma::mat U = H_invhalf * Gamma_prev;     // p × (k-1)
+  arma::mat U = H_invhalf * Gamma_prev;                        // p × (k-1)
 
   arma::mat Q = arma::null(U.t());  // p × (p-k+1)
 

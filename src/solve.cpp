@@ -15,19 +15,23 @@ arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
     arma::vec g(beta.n_elem, arma::fill::zeros);
     for (arma::uword i = 0; i < n; ++i) {
       double eta = arma::dot(X.row(i), beta);
-      double wi =
-          std::exp(-eta) * arma::as_scalar(gamma.t() * S.slice(i) * gamma);
+      double wi = arma::trunc_exp(-eta) *
+                  arma::as_scalar(gamma.t() * S.slice(i) * gamma);
       arma::vec xi = X.row(i).t();
-      Hbeta += wi * (xi * xi.t());
-      g += (T[i] - wi) * xi;
+      Hbeta += wi * (xi * xi.t()) / static_cast<double>(n);
+      g += (T[i] - wi) * xi / static_cast<double>(n);
     }
 
+    std::cout << "Hbeta = \n" << Hbeta << std::endl;
     arma::vec delta = arma::solve(
         Hbeta, g, arma::solve_opts::fast + arma::solve_opts::likely_sympd);
-    beta -= delta;
+    beta -= delta;  // step size 1 / ||delta||_inf to improve stability
     if (arma::norm(delta, "inf") < tol) {
       break;
     }
   }
+
+  std::cout << "beta = \n" << beta << std::endl;
+
   return beta;
 }

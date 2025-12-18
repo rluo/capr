@@ -70,7 +70,7 @@ print.capr <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
     coef_fmt <- signif(B_hat, digits = digits)
     dimnames(coef_fmt) <- list(row_labs, col_labs)
 
-    cat("\nCoefficient estimates (B-hat):\n")
+    cat("\nCoefficient estimates:\n")
     coef_df <- data.frame(
         Term = row_labs,
         coef_fmt,

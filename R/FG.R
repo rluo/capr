@@ -2,7 +2,7 @@
 #'
 #' Implements the Flury & Gautschi (1986) iterative algorithm to estimate a
 #' common loading matrix across multiple covariance matrices. Each iteration
-#' cycles over all ordered pairs of variable indices and updates a \(2 \times 2\)
+#' cycles over all ordered pairs of variable indices and updates a \(2 x 2\)
 #' rotation so that the transformed matrices share diagonal structure.
 #'
 #' Two solvers are exported:
@@ -13,7 +13,7 @@
 #'   computation.}
 #' }
 #'
-#' @param cov_array Numeric 3D array of shape \eqn{P \times P \times M}
+#' @param cov_array Numeric 3D array of shape \eqn{P x P x M}
 #'   containing covariance matrices in its \eqn{M} slices.
 #' @param P Optional integer specifying the matrix dimension; defaults to
 #'   \code{dim(cov_array)[1]}.
@@ -21,7 +21,7 @@
 #'   to \code{dim(cov_array)[3]}.
 #' @param maxit Integer scalar; number of outer iterations of the algorithm.
 #'
-#' @return A \eqn{P \times P} numeric matrix of estimated common loadings.
+#' @return A \eqn{P x P} numeric matrix of estimated common loadings.
 #'
 #' @examples
 #' \dontrun{

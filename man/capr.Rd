@@ -28,7 +28,7 @@ capr(
 
 \item{Gamma.init}{Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian cube or array).}
 
-\item{weight}{Numeric vector of length \eqn{n} (default rep(T, n)), where T should be the sample size for each \eqn{S_i}.}
+\item{weight}{Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S_i}.}
 
 \item{max_iter}{Integer scalar, max flip–flop iterations per component (default 200).}
 

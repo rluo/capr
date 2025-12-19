@@ -49,7 +49,7 @@ static arma::vec solve_gamma(
     const arma::mat& H,           //  p × p   (SPD)
     const arma::mat& Gamma_prev)  //  p × (k-1)  (may have 0 cols)
 {
-  const arma::uword p = A.n_rows;
+  // const arma::uword p = A.n_rows;
 
   // -------------------------------------------------------------------------
   //  Case 1  :  *no* orthogonality constraints  →  plain gen-eigen problem

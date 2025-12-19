@@ -41,8 +41,9 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   arma::mat H(p, p, arma::fill::zeros);
   for (arma::uword i = 0; i < n; ++i) H += S.slice(i);
   H /= static_cast<double>(n);
+#ifdef DEBUG
   std::cout << "starting core " << H << std::endl;
-
+#endif
   for (arma::uword i = 0; i < gamma_work.n_cols; ++i) {
     arma::vec gamma = gamma_work.col(i);
 
@@ -76,9 +77,9 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
       for (arma::uword i = 0; i < n; ++i)
         A += arma::trunc_exp(-arma::dot(X.row(i), beta)) * S.slice(i) /
              static_cast<double>(n);
-
+#ifdef DEBUG
       std::cout << "solving gamma A " << A << "\n H " << H << std::endl;
-
+#endif
       gamma = has_constraints ? solve_gamma(A, H, opt_Gamma_prev->get())
                               : solve_gamma_unconstrained(A, H);
 

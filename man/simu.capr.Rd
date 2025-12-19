@@ -2,50 +2,35 @@
 % Please edit documentation in R/simu.R
 \name{simu.capr}
 \alias{simu.capr}
-\title{Simulate Covariate-Assisted Principal Regression Data}
+\title{Simulate covariance matrices compatible with \code{capr()}}
 \usage{
 simu.capr(seed = 123L, p = 5L, n = 120L)
 }
 \arguments{
-\item{seed}{Integer scalar, random seed for reproducibility (default 123).}
+\item{seed}{Integer seed used for reproducibility.}
 
-\item{p}{Integer scalar, dimension of the covariance matrices (default 5).}
+\item{p}{Number of variables (dimension of the covariance matrices).}
 
-\item{n}{Integer scalar, number of samples/observations (default 120).}
+\item{n}{Number of observations (slices) to generate.}
 }
 \value{
-A list containing:
-\item{S}{Numeric 3D array of dimension \eqn{p \times p \times n};
-stack of covariance matrices.}
-\item{X}{Numeric matrix of dimension \eqn{n \times 2}; design matrix
-with intercept column and binary covariate.}
-\item{Q}{Numeric matrix of dimension \eqn{p \times p};
-orthogonal matrix (eigenvectors of reference covariance).}
-\item{BetaMat}{Numeric matrix of dimension \eqn{2 \times p};
-true regression coefficients of log-eigenvalues.}
-\item{H}{Numeric matrix of dimension \eqn{p \times p};
-mean of covariance matrices across all samples.}
-\item{p}{Integer; dimension parameter.}
-\item{n}{Integer; sample size parameter.}
+A list with components:
+\item{S}{Array of dimension \eqn{p \times p \times n} holding the simulated
+covariance matrices.}
+\item{X}{Design matrix of size \eqn{n \times 2} with an intercept and a
+Bernoulli covariate.}
+\item{Q}{Orthogonal matrix whose columns are the latent directions.}
+\item{BetaMat}{True coefficient matrix used to form the eigenvalues.}
+\item{H}{Average covariance matrix \eqn{\frac{1}{n}\sum_i S_i}.}
+\item{p, n}{The dimension and sample size supplied to the generator.}
 }
 \description{
-Generates synthetic data for the CAP (Covariate Assisted Principal Regression)
-model. Creates a collection of covariance matrices whose log-spectra vary
-linearly with binary covariates.
-}
-\details{
-The generative model:
-\itemize{
-\item \eqn{\lambda_i = \exp(X_i \beta)} where \eqn{\beta} are the true log-eigenvalues.
-\item \eqn{S_i = Q \Lambda_i Q^T}, where \eqn{\Lambda_i = \text{diag}(\lambda_i)}.
-\item The true \code{BetaMat} is a fixed \eqn{2 \times p} matrix.
-\item Covariates \eqn{X} are: intercept + Bernoulli(0.5).
-}
+Generates a simple synthetic dataset for CAP regression consisting of a
+covariance cube, design matrix, and the latent orthogonal directions used to
+build the covariance slices.
 }
 \examples{
-dat <- simu.capr(seed = 42, p = 5, n = 100)
-str(dat)
-# S is a 5 x 5 x 100 array of covariance matrices
-# X is a 100 x 2 design matrix
+sim <- simu.capr(seed = 10, p = 4, n = 50)
+str(sim$S)
 
 }

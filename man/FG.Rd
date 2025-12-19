@@ -10,7 +10,7 @@ FG(cov_array, P = NULL, M = NULL, maxit = 30L)
 FG2(cov_array, P = NULL, M = NULL, maxit = 30L)
 }
 \arguments{
-\item{cov_array}{Numeric 3D array of shape \eqn{P \times P \times M}
+\item{cov_array}{Numeric 3D array of shape \eqn{P x P x M}
 containing covariance matrices in its \eqn{M} slices.}
 
 \item{P}{Optional integer specifying the matrix dimension; defaults to
@@ -22,12 +22,12 @@ to \code{dim(cov_array)[3]}.}
 \item{maxit}{Integer scalar; number of outer iterations of the algorithm.}
 }
 \value{
-A \eqn{P \times P} numeric matrix of estimated common loadings.
+A \eqn{P x P} numeric matrix of estimated common loadings.
 }
 \description{
 Implements the Flury & Gautschi (1986) iterative algorithm to estimate a
 common loading matrix across multiple covariance matrices. Each iteration
-cycles over all ordered pairs of variable indices and updates a \(2 \times 2\)
+cycles over all ordered pairs of variable indices and updates a \(2 x 2\)
 rotation so that the transformed matrices share diagonal structure.
 }
 \details{

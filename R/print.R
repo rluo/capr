@@ -51,7 +51,7 @@ print.capr <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
             digits = digits,
             format = "f"
         )
-        cat("Log-likelihood by component: ",
+        cat("Objective function by component: ",
             paste(loglike_fmt, collapse = ", "),
             "\n",
             sep = ""

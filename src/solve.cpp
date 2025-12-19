@@ -22,7 +22,9 @@ arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
       g += (T[i] - wi) * xi / static_cast<double>(n);
     }
 
+#ifdef DEBUG
     std::cout << "Hbeta = \n" << Hbeta << std::endl;
+#endif
     arma::vec delta = arma::solve(
         Hbeta, g, arma::solve_opts::fast + arma::solve_opts::likely_sympd);
     beta -= delta;  // step size 1 / ||delta||_inf to improve stability
@@ -31,7 +33,11 @@ arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
     }
   }
 
+#ifdef DEBUG
   std::cout << "beta = \n" << beta << std::endl;
-
+#endif
+  if (arma::norm(beta, "inf") > 16) {
+    Rcpp::warning("Large beta values detected; results may be unstable.");
+  }
   return beta;
 }

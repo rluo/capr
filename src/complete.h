@@ -96,10 +96,10 @@ arma::cube rank_complete_s(const arma::cube& S_cube,     // p×p×n
 
   // ---- compute   E = exp(X %*% B)   and  a = max(E) -----------------------
   arma::mat E = arma::exp(X * B);  // n × (k−1)
-  const double a = E.max();        // scalar
+  const double a = 2 * E.max();    // scalar
 
   // ---- pre-allocate result cube ------------------------------------------
-  arma::cube S_tilde(p, p, n);
+  arma::cube S_tilde(p, p, n, arma::fill::zeros);
 
   // ---- main loop over subjects -------------------------------------------
   for (arma::uword i = 0; i < n; ++i) {
@@ -109,9 +109,30 @@ arma::cube rank_complete_s(const arma::cube& S_cube,     // p×p×n
     arma::mat correction =
         Gamma_prev * arma::diagmat(di) * Gamma_prev.t();  // p × p
 
-    S_tilde.slice(i) = S_cube.slice(i) - correction;
+    S_tilde.slice(i) = S_cube.slice(i) + correction;
   }
 
+  return S_tilde;
+}
+
+arma::cube deflate_s(const arma::cube& S_cube, const arma::mat& Gamma_prev) {
+  const arma::uword p = S_cube.n_rows;
+  const arma::uword n = S_cube.n_slices;
+
+  if (Gamma_prev.n_cols == 0) return S_cube;
+
+  arma::mat Q, R;
+  arma::qr_econ(Q, R, Gamma_prev);  // Q: p×(k−1), orthonormal columns
+  arma::mat P = Q * Q.t();          // true orthogonal projector
+  arma::mat I = arma::eye(p, p);
+  arma::mat M = I - P;
+
+  arma::cube S_tilde(p, p, n, arma::fill::zeros);
+  for (arma::uword i = 0; i < n; ++i) {
+    arma::mat Si = S_cube.slice(i);
+    S_tilde.slice(i) = M * Si * M;  // (I-P) S (I-P)
+    S_tilde.slice(i) = 0.5 * (S_tilde.slice(i) + S_tilde.slice(i).t());  // sym
+  }
   return S_tilde;
 }
 

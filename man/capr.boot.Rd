@@ -11,7 +11,7 @@ capr.boot(
   nboot = 1000L,
   weight = NULL,
   level = 0.95,
-  max_iter = 50L,
+  max_iter = 100L,
   tol = 1e-06,
   seed = NULL
 )

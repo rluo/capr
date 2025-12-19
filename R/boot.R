@@ -28,7 +28,7 @@
 #'
 #' @export
 capr.boot <- function(S, X, fit, nboot = 1000L, weight = NULL,
-                      level = 0.95, max_iter = 50L, tol = 1e-6,
+                      level = 0.95, max_iter = 100L, tol = 1e-6,
                       seed = NULL) {
     if (!inherits(fit, "capr")) {
         stop("`fit` must be an object returned by `capr()`.", call. = FALSE)

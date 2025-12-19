@@ -27,6 +27,9 @@ arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
 #endif
     arma::vec delta = arma::solve(
         Hbeta, g, arma::solve_opts::fast + arma::solve_opts::likely_sympd);
+#ifdef DEBUG
+    std::cout << "delta = \n" << delta << std::endl;
+#endif
     beta -= delta;  // step size 1 / ||delta||_inf to improve stability
     if (arma::norm(delta, "inf") < tol) {
       break;

@@ -4,7 +4,7 @@
 \alias{print.capr.boot}
 \title{Print method for \code{capr.boot} objects}
 \usage{
-\method{print}{capr.boot}(x, digits = max(3L, getOption("digits") - 3L), ...)
+\method{print}{capr.boot}(x, digits = max(4L, getOption("digits") - 4L), ...)
 }
 \arguments{
 \item{x}{An object of class \code{capr.boot}, typically produced by \code{\link[=capr.boot]{capr.boot()}}.}

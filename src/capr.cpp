@@ -70,7 +70,7 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
     for (int it = 0; it < max_iter; ++it) {
       arma::vec beta_old = beta, gamma_old = gamma;
 
-      beta = newton_beta(S, X, T, beta, gamma);
+      beta = newton_beta(S, X, T, beta, gamma, 10, tol);
 
       // build A(β)
       arma::mat A(p, p, arma::fill::zeros);

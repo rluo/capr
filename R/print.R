@@ -109,7 +109,7 @@ print.capr <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
 #' )
 #' print(fit.boot)
 #' @export
-print.capr.boot <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+print.capr.boot <- function(x, digits = max(4L, getOption("digits") - 4L), ...) {
     if (!inherits(x, "capr.boot")) {
         stop("`x` must be a bootstrap result from `capr.boot()`.", call. = FALSE)
     }

@@ -29,7 +29,7 @@ simu.capr <- function(seed = 123L, p = 5L, n = 120L) {
 
     BetaMat <- rbind(
         c(5, 4, 1, -1, -2),
-        c(0, -1, 1, 0, 0)
+        c(0, -1.2, 0.9, 0, 0)
     )
     if (ncol(BetaMat) != p) {
         stop("BetaMat must have ", p, " columns.", call. = FALSE)
@@ -41,7 +41,10 @@ simu.capr <- function(seed = 123L, p = 5L, n = 120L) {
     S <- array(0, dim = c(p, p, n))
     for (i in seq_len(n)) {
         lambda_i <- exp(drop(X[i, , drop = FALSE] %*% BetaMat))
-        S[, , i] <- Q %*% diag(lambda_i, p) %*% t(Q)
+        Sigma <- Q %*% diag(lambda_i, p) %*% t(Q)
+        Y <- MASS::mvrnorm(n = 200L, mu = rep(0, p), Sigma = Sigma)
+        S[, , i] <- stats::cov(Y)
+        ## S[, , i] <- Q %*% diag(lambda_i, p) %*% t(Q)
     }
 
     list(

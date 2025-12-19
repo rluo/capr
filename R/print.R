@@ -149,7 +149,7 @@ print.capr.boot <- function(x, digits = max(3L, getOption("digits") - 3L), ...) 
     level_text <- if (is.na(level)) {
         "Bootstrap coefficient summaries"
     } else {
-        sprintf("Bootstrap coefficient summaries (level %.1f%%)", 100 * level)
+        sprintf("CAPR coefficient summaries (level %.1f%%)", 100 * level)
     }
     cat(level_text, "\n")
 

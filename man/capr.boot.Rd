@@ -5,9 +5,9 @@
 \title{Bootstrap confidence intervals for CAP coefficients}
 \usage{
 capr.boot(
+  fit,
   S,
   X,
-  fit,
   nboot = 1000L,
   weight = NULL,
   level = 0.95,
@@ -17,12 +17,12 @@ capr.boot(
 )
 }
 \arguments{
+\item{fit}{A \code{\link{capr}} fit containing \code{$B} and \code{$Gamma}.}
+
 \item{S}{Numeric array of shape \eqn{p \times p \times n}, matching the data
 used to fit \code{fit}.}
 
 \item{X}{Numeric design matrix with \eqn{n} rows.}
-
-\item{fit}{A \code{\link{capr}} fit containing \code{$B} and \code{$Gamma}.}
 
 \item{nboot}{Number of bootstrap replicates.}
 

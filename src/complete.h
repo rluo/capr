@@ -109,7 +109,7 @@ arma::cube rank_complete_s(const arma::cube& S_cube,     // p×p×n
     arma::mat correction =
         Gamma_prev * arma::diagmat(di) * Gamma_prev.t();  // p × p
 
-    S_tilde.slice(i) = S_cube.slice(i) + correction;
+    S_tilde.slice(i) = S_cube.slice(i) - correction;
   }
 
   return S_tilde;

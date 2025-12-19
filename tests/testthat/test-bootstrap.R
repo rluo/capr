@@ -13,9 +13,9 @@ test_that("capr_bootstrap produces coefficient intervals", {
     )
 
     boot <- capr.boot(
+        fit = fit,
         S = sim$S,
         X = sim$X,
-        fit = fit,
         nboot = 10L,
         max_iter = 20L,
         tol = 1e-6,

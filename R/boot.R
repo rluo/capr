@@ -27,7 +27,7 @@
 #' \item{level}{The requested confidence level.}
 #'
 #' @export
-capr.boot <- function(S, X, fit, nboot = 1000L, weight = NULL,
+capr.boot <- function(fit, S, X, nboot = 1000L, weight = NULL,
                       level = 0.95, max_iter = 100L, tol = 1e-6,
                       seed = NULL) {
     if (!inherits(fit, "capr")) {

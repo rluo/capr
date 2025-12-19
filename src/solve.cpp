@@ -40,7 +40,9 @@ arma::vec newton_beta(const arma::cube& S, const arma::mat& X,
   std::cout << "beta = \n" << beta << std::endl;
 #endif
   if (arma::norm(beta, "inf") > 16) {
-    Rcpp::warning("Large beta values detected; results may be unstable.");
+    Rcpp::warning(
+        "Large beta values detected; results may be unstable.\nConsider "
+        "rescaling the covariates and changing the initial values.");
   }
   return beta;
 }

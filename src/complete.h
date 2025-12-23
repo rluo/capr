@@ -115,7 +115,8 @@ arma::cube rank_complete_s(const arma::cube& S_cube,     // p×p×n
   return S_tilde;
 }
 
-arma::cube deflate_s(const arma::cube& S_cube, const arma::mat& Gamma_prev) {
+arma::cube deflate_s_projection(const arma::cube& S_cube,
+                                const arma::mat& Gamma_prev) {
   const arma::uword p = S_cube.n_rows;
   const arma::uword n = S_cube.n_slices;
 
@@ -133,6 +134,61 @@ arma::cube deflate_s(const arma::cube& S_cube, const arma::mat& Gamma_prev) {
     S_tilde.slice(i) = M * Si * M;  // (I-P) S (I-P)
     S_tilde.slice(i) = 0.5 * (S_tilde.slice(i) + S_tilde.slice(i).t());  // sym
   }
+  return S_tilde;
+}
+
+arma::mat inv_sqrt_matrix(const arma::mat& A) {
+  arma::vec eigval;
+  arma::mat eigvec;
+
+  // Step 1: Perform eigenvalue decomposition
+  // The "dc_sym" algorithm is generally faster for symmetric matrices
+  arma::eig_sym(eigval, eigvec, A, "dc_sym");
+
+  // Ensure all eigenvalues are positive to avoid issues (for positive definite
+  // matrix assumption)
+  if (eigval.min() <= 0) {
+    // Handle error or adjust based on your specific use case
+    // For general matrices, alternative methods are needed
+  }
+
+  // Step 2: Calculate inverse square roots of eigenvalues and create a diagonal
+  // matrix Operate on the vector of eigenvalues
+  arma::vec inv_sqrt_eigval = arma::pow(eigval, -0.5);
+  arma::mat inv_sqrt_D = arma::diagmat(inv_sqrt_eigval);
+
+  // Step 3: Reconstruct the inverse square root matrix
+  // A^(-1/2) = V * D^(-1/2) * V.t()
+  arma::mat A_inv_sqrt = eigvec * inv_sqrt_D * eigvec.t();
+
+  return A_inv_sqrt;
+}
+
+arma::cube rank_complete_multiply(
+    const arma::cube& S_cube,     // p×p×n
+    const arma::mat& X,           // n×q
+    const arma::mat& Gamma_prev,  // p×(k−1)
+    const arma::mat& B)  // q×(k−1)  const arma::uword p = S_cube.n_rows;
+{
+  const arma::uword n = S_cube.n_slices;
+  const arma::uword p = S_cube.n_rows;
+
+  if (Gamma_prev.n_cols == 0) return S_cube;
+  arma::mat E = arma::exp(X * B);  // n × (k−1)
+
+  // ---- pre-allocate result cube ------------------------------------------
+  arma::cube S_tilde(p, p, n, arma::fill::zeros);
+
+  // ---- main loop over subjects -------------------------------------------
+  for (arma::uword i = 0; i < n; ++i) {
+    arma::rowvec Ei = E.row(i);  // 1 × (k−1)
+
+    arma::mat Shat = Gamma_prev * arma::diagmat(Ei) * Gamma_prev.t();  // p × p
+    arma::mat Ssqrtinv = inv_sqrt_matrix(Shat);
+
+    S_tilde.slice(i) = Ssqrtinv * S_cube.slice(i) * Ssqrtinv;
+  }
+
   return S_tilde;
 }
 

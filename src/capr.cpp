@@ -166,8 +166,9 @@ Rcpp::List CAP_multi_components(
       arma::mat Bprev = B.cols(0, k - 1);
 
       // S_current = rank_complete_s(S, X, Gprev, Bprev);
+      S_current = rank_complete_multiply(S, X, Gprev, Bprev);
       // S_current = deflate_s(S, X, Gprev, Bprev);
-      S_current = deflate_s(S, Gprev);
+      // S_current = deflate_s(S, Gprev);
 
       if (orth) {
         for (arma::uword init_idx = 0; init_idx < gamma_k.n_cols; ++init_idx) {

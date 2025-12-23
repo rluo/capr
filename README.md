@@ -65,6 +65,10 @@ Add Releases and TODOs
     usethis::use_news_md()
 
 
+# Test
+
+    Rscript --vanilla  runtest.R
+
 ## Release
 
     usethis::use_version("minor")   # or patch/major

@@ -124,6 +124,10 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
         stop("`orth` must be a single logical (TRUE/FALSE).", call. = FALSE)
     }
 
+    if (!orth && K > 1L) {
+        warning("Fitting multiple components without orthogonalization may lead to identical components.", call. = FALSE)
+    }
+
     cap_fit <- CAP_multi_components(
         S = S,
         X = X,

@@ -9,6 +9,8 @@ library(capr)
 simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
 K <- 2L
 
+print("No orth testing ")
+
 
 fit <- capr(
     S = simu.data$S,
@@ -19,6 +21,8 @@ fit <- capr(
 )
 fit
 
+
+print("With orth testing ")
 
 fit <- capr(
     S = simu.data$S,

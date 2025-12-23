@@ -137,43 +137,43 @@ arma::cube deflate_s_projection(const arma::cube& S_cube,
   return S_tilde;
 }
 
-arma::mat inv_sqrt_matrix(const arma::mat& A) {
+arma::mat inv_sqrt_matrix(const arma::mat& A, const int k) {
+  // Force symmetry before the eigendecomposition to avoid warnings/failures
+  arma::mat A_sym = 0.5 * (A + A.t());
+
   arma::vec eigval;
   arma::mat eigvec;
+  const bool ok = arma::eig_sym(eigval, eigvec, A_sym, "dc");
+  if (!ok) Rcpp::stop("inv_sqrt_matrix: eigen-decomposition failed.");
 
-  // Step 1: Perform eigenvalue decomposition
-  // The "dc_sym" algorithm is generally faster for symmetric matrices
-  arma::eig_sym(eigval, eigvec, A, "dc_sym");
+  // Guard against non-positive eigenvalues (rank deficiency / numerical noise)
+  const double lambda_max = eigval.max();
+  const double floor =
+      std::max(lambda_max * 1e-6, 1e-12);  // cap condition number, avoid zeros
+  eigval.transform([floor](double v) { return (v < floor) ? floor : v; });
 
-  // Ensure all eigenvalues are positive to avoid issues (for positive definite
-  // matrix assumption)
-  if (eigval.min() <= 0) {
-    // Handle error or adjust based on your specific use case
-    // For general matrices, alternative methods are needed
-  }
-
-  // Step 2: Calculate inverse square roots of eigenvalues and create a diagonal
-  // matrix Operate on the vector of eigenvalues
-  arma::vec inv_sqrt_eigval = arma::pow(eigval, -0.5);
+  arma::vec inv_sqrt_eigval = 1.0 / arma::sqrt(eigval.head(k));
   arma::mat inv_sqrt_D = arma::diagmat(inv_sqrt_eigval);
+  arma::mat eigvec_k = eigvec.cols(0, k - 1);
 
-  // Step 3: Reconstruct the inverse square root matrix
-  // A^(-1/2) = V * D^(-1/2) * V.t()
-  arma::mat A_inv_sqrt = eigvec * inv_sqrt_D * eigvec.t();
-
-  return A_inv_sqrt;
+  return eigvec_k * inv_sqrt_D * eigvec_k.t();
 }
 
-arma::cube rank_complete_multiply(
-    const arma::cube& S_cube,     // p×p×n
-    const arma::mat& X,           // n×q
-    const arma::mat& Gamma_prev,  // p×(k−1)
-    const arma::mat& B)  // q×(k−1)  const arma::uword p = S_cube.n_rows;
+arma::cube rank_complete_multiply(const arma::cube& S_cube,     // p×p×n
+                                  const arma::mat& X,           // n×q
+                                  const arma::mat& Gamma_prev,  // p×(k−1)
+                                  const arma::mat& B)           // q×(k−1)
 {
   const arma::uword n = S_cube.n_slices;
   const arma::uword p = S_cube.n_rows;
 
   if (Gamma_prev.n_cols == 0) return S_cube;
+
+  if (X.n_rows != n) Rcpp::stop("rank_complete_multiply: X must have n rows.");
+  if (B.n_rows != X.n_cols || B.n_cols != Gamma_prev.n_cols)
+    Rcpp::stop(
+        "rank_complete_multiply: B must be q×(k-1) and match Gamma_prev.");
+
   arma::mat E = arma::exp(X * B);  // n × (k−1)
 
   // ---- pre-allocate result cube ------------------------------------------
@@ -184,7 +184,8 @@ arma::cube rank_complete_multiply(
     arma::rowvec Ei = E.row(i);  // 1 × (k−1)
 
     arma::mat Shat = Gamma_prev * arma::diagmat(Ei) * Gamma_prev.t();  // p × p
-    arma::mat Ssqrtinv = inv_sqrt_matrix(Shat);
+    // Shat = 0.5 * (Shat + Shat.t());  // enforce symmetry for eig_sym
+    arma::mat Ssqrtinv = inv_sqrt_matrix(Shat, Gamma_prev.n_cols);
 
     S_tilde.slice(i) = Ssqrtinv * S_cube.slice(i) * Ssqrtinv;
   }

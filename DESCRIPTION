@@ -9,7 +9,7 @@ Authors@R:
         person("Yi", "Zhao", email = "zhaoyi1026@gmail.com", role = "aut"),
         person("Brian", "Caffo", email = "bcaffo@gmail.com", role = "aut")
     )
-Description: Implements Covariate Assisted Principal Regression (CAPR) for
+Description: Covariate Assisted Principal Regression (CAPR) for multiple 
     covariance-matrix outcomes. The method identifies projection (principal)
     directions that maximize the log-likelihood of a log-linear regression model
     of the covariates. See Zhao et al. (2021), "Covariate Assisted Principal

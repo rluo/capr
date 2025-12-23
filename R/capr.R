@@ -1,20 +1,20 @@
 #' Covariate Assisted Projection (CAP) Regression
 #'
-#' Fits (multiple) CAP components sequentially by alternating updates of
-#' direction vectors \eqn{\gamma^{(k)}} and regression coefficients
-#' \eqn{\beta^{(k)}}. Each component is estimated via a flip–flop algorithm,
-#' with optional orthogonalization of successive directions.
+#' Fits (multiple) CAP components sequentially for the
+#' principal direction vectors \eqn{\gamma^{(k)}} and corresponding regression coefficients
+#' \eqn{\beta^{(k)}}, \eqn{k = 1, \dots, K}. Each component is estimated via a flip–flop algorithm,
+#' with recommended orthogonalization of successive directions.
 #'
 #' @param S Numeric 3D array of size \eqn{p \times p \times n} (stack of covariance matrices).
-#' @param X Numeric matrix \eqn{n \times q} (design matrix).
+#' @param X Numeric matrix \eqn{n \times q} (design matrix), created for example by \code{model.matrix}.
 #' @param weight Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S_i}.
-#' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian cube or array).
-#' @param B.init Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero cube or array).
+#' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian 3D array).
+#' @param B.init Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero 3D array).
 #' @param K Integer scalar, number of components (\eqn{K \ge 1}).
 #' @param max_iter Integer scalar, max flip–flop iterations per component (default 200).
 #' @param tol Positive numeric scalar, convergence tolerance (default 1e-6).
-#' @param orth Logical scalar; if TRUE (default), enforce orthogonality of successive \eqn{\gamma}.
-#' @param n.init Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are set properly, n.init is ignored.
+#' @param orth Logical scalar; if TRUE (default), enforce orthogonality (recommended) of successive \eqn{\gamma}. If FALSE, no orthogonalization is performed with warnings of potential identical components.
+#' @param n.init Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are both set properly, n.init is ignored.
 #' @return A list with:
 #' \item{B}{numeric matrix \eqn{q \times K}, column \eqn{k} stores \eqn{\beta^{(k)}}}
 #' \item{Gamma}{numeric matrix \eqn{p \times K}, column \eqn{k} stores \eqn{\gamma^{(k)}}}

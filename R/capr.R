@@ -1,13 +1,13 @@
 #' Covariate Assisted Projection (CAP) Regression
 #'
-#' Fits (multiple) CAP components sequentially for the
+#' Fits (multiple) CAP components sequentially for each of the
 #' principal direction vectors \eqn{\gamma^{(k)}} and corresponding regression coefficients
 #' \eqn{\beta^{(k)}}, \eqn{k = 1, \dots, K}. Each component is estimated via a flip–flop algorithm,
 #' with recommended orthogonalization of successive directions.
 #'
-#' @param S Numeric 3D array of size \eqn{p \times p \times n} (stack of covariance matrices).
+#' @param S Numeric 3D array of size \eqn{p \times p \times n} (for example, stack of covariance matrices).
 #' @param X Numeric matrix \eqn{n \times q} (design matrix), created for example by \code{model.matrix}.
-#' @param weight Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S_i}.
+#' @param weight Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S[,,i]}.
 #' @param Gamma.init Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian 3D array).
 #' @param B.init Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero 3D array).
 #' @param K Integer scalar, number of components (\eqn{K \ge 1}).
@@ -15,21 +15,24 @@
 #' @param tol Positive numeric scalar, convergence tolerance (default 1e-6).
 #' @param orth Logical scalar; if TRUE (default), enforce orthogonality (recommended) of successive \eqn{\gamma}. If FALSE, no orthogonalization is performed with warnings of potential identical components.
 #' @param n.init Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are both set properly, n.init is ignored.
-#' @return A list with:
+#' @return A list in class capr with:
 #' \item{B}{numeric matrix \eqn{q \times K}, column \eqn{k} stores \eqn{\beta^{(k)}}}
 #' \item{Gamma}{numeric matrix \eqn{p \times K}, column \eqn{k} stores \eqn{\gamma^{(k)}}}
+#' \item{loglike}{negative loglikehood, upto constant scaling and shift}
+#' \item{S}{3D array used for fitting}
+#' \item{X}{design matrix used for fitting}
+#' \item{weight}{weight values used for fitting}
+#'
 #'
 #' @details
-#' For \eqn{k = 1, \dots, K}:
-#' * Initialize \eqn{\beta^{(k)}} (zeros) and \eqn{\gamma^{(k)}} (random normal).
-#' * If \code{orth = TRUE} and \code{k > 1}, orthogonalize \eqn{\gamma^{(k)}} against previous directions.
-#' * Optionally rank-complete the covariance cube \code{S} given previous directions/coefficients
-#'   if a function \code{rank_complete_s()} is available.
-#' * Call \code{CAP_one_component()} to update \eqn{\beta^{(k)}} and \eqn{\gamma^{(k)}} until convergence.
+#' The CAP negative log-likelihood is defined as \deqn{  	\underset{\boldsymbol{\beta},\boldsymbol{\gamma}}{\text{minimize}} &&    \frac{1}{2}\sum_{i=1}^{n}(\bx_{i}^\top\boldsymbol{\beta}^{(k)}) \cdot T_{i}  +\frac{1}{2}\sum_{i=1}^{n} \boldsymbol{\gamma}^{(k)\top} \bS_{i}^{(k)} \boldsymbol{\gamma}^{(k)} \cdot \exp(-\bx_{i}^\top\boldsymbol{\beta}^{(k)}) , \nonumber \\
+# \text{such that} &&  \boldsymbol{\gamma}^{(k)\top}\bH\boldsymbol{\gamma}^{(k)}=1, \nonumber \\
+# \text{and} && \Gamma^{(k-1)\top}\boldsymbol{\gamma}^{(k)}=\boldsymbol{\mathrm{0}}. }
+#' The algoirhtm fit the \eqn{\gamma} and \eqn{\beta} sequentially with (ranom) multiple  innitializations  and returns the  solution pair that minimizes the negative log-likehood.
+#' \end{eqnarray}} for each component.
 #'
-#' @note Requires \code{CAP_one_component()} to be available. If \code{rank_complete_s()} is not
-#' defined, the input \code{S} is used as-is at each step.
-#'
+#' @references
+#' Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021). Covariate assisted principal regression for covariance matrix outcomes. Biostatistics, 22(3), 629-645.
 #' @examples
 #' simu.data <- simu.capr(seed = 123L, n = 120L)
 #' K <- 2L
@@ -150,7 +153,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
     rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec, S = S, weight = weight)
+    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec, S = S, X = X, weight = weight)
     class(ret) <- c("capr")
     ret
 }

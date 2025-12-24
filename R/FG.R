@@ -1,16 +1,14 @@
 #' Flury-Gautschi Common Principal Components
 #'
-#' Implements the Flury & Gautschi (1986) iterative algorithm to estimate a
+#' Implements the Flury & Gautschi (1986) (FG) iterative algorithm and a variant to estimate a
 #' common loading matrix across multiple covariance matrices. Each iteration
-#' cycles over all ordered pairs of variable indices and updates a \(2 x 2\)
+#' cycles over all ordered pairs of variable indices and updates a (2 x 2)
 #' rotation so that the transformed matrices share diagonal structure.
 #'
 #' Two solvers are exported:
 #' \describe{
-#'   \item{`FG()`}{Calls the original implementation in \code{FG.cpp}.}
-#'   \item{`FG2()`}{Calls the alternative implementation in \code{FG2.cpp} that
-#'   follows the same interface but can be used to benchmark or validate the
-#'   computation.}
+#'   \item{`FG()`}{The original FG algorithm.}
+#'   \item{`FG2()`}{An alternative algorithm  by Eslami et al, 2013.}
 #' }
 #'
 #' @param cov_array Numeric 3D array of shape \eqn{P x P x M}
@@ -23,6 +21,17 @@
 #'
 #' @return A \eqn{P x P} numeric matrix of estimated common loadings.
 #'
+#' @references
+#' B. N. Flury (1984). Common principal components in k
+# groups.  \emph{Journal of the American Statistical
+# Association}, 79, 892-898.
+
+#' Flury, B. N., & Gautschi, W. (1986). An algorithm for simultaneous orthogonal transformation of several positive definite symmetric matrices to nearly diagonal form. \emph{SIAM Journal on Scientific and Statistical Computing}, 7(1), 169-184.
+
+# A. Eslami, E. M. Qannari, A. Kohler and S. Bougeard (2013).
+# General overview of methods of analysis of multi-group
+# datasets, \emph{Revue des Nouvelles Technologies de
+# l'Information}, 25, 108-123.
 #' @examples
 #' \dontrun{
 #' set.seed(1)

@@ -58,6 +58,3 @@ FG2(cov_cube, maxit = 5)
 }
 
 }
-\seealso{
-\code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
-}

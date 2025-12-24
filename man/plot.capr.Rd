@@ -4,12 +4,10 @@
 \alias{plot.capr}
 \title{Plot log-deviance from diagonality by component count}
 \usage{
-\method{plot}{capr}(fit, S, ...)
+\method{plot}{capr}(x, ...)
 }
 \arguments{
-\item{fit}{A \code{capr} object returned by \code{\link[=capr]{capr()}}.}
-
-\item{S}{Numeric 3D array of covariance matrices used to fit \code{fit}.}
+\item{x}{A \code{capr} object returned by \code{\link[=capr]{capr()}}.}
 
 \item{...}{Additional arguments passed to \code{\link[graphics:plot.default]{graphics::plot()}} and applied to
 both panels (for example, \code{pch}, \code{col}, or axis limits).}
@@ -19,7 +17,7 @@ Invisibly returns the numeric vector of log-deviance values (one per
 component).
 }
 \description{
-For a fitted CAP regression, plots two diagnostics across the first
+For a xted CAP regression, plots two diagnostics across the first
 \eqn{K} components: (1) the negative log-likelihood returned by \code{\link[=capr]{capr()}}
 and (2) the log deviation-from-diagonality (DfD) for the loading matrix
 formed by the first \eqn{k} directions. Both curves help diagnose how much
@@ -38,8 +36,8 @@ log-likelihood or log-DfD curve.
 \examples{
 \dontrun{
 sim <- simu.capr(seed = 123L, n = 120L)
-fit <- capr(S = sim$S, K = 3L)
-plot(fit, S = sim$S)
+x <- capr(S = sim$S, K = 3L)
+plot(x, S = sim$S)
 }
 }
 \seealso{

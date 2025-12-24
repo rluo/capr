@@ -64,7 +64,7 @@ Requires \code{CAP_one_component()} to be available. If \code{rank_complete_s()}
 defined, the input \code{S} is used as-is at each step.
 }
 \examples{
-simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+simu.data <- simu.capr(seed = 123L, n = 120L)
 K <- 2L
 fit <- capr(
     S = simu.data$S,
@@ -72,7 +72,4 @@ fit <- capr(
     K = K
 )
 print(fit)
-}
-\seealso{
-\code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 }

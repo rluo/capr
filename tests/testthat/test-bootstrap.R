@@ -1,12 +1,11 @@
 test_that("capr_bootstrap produces coefficient intervals", {
-    sim <- capr_test_data(seed = 321L, p = 5L, n = 80L)
+    sim <- simu.capr(seed = 1L, n = 50L)
     K <- 2L
 
     fit <- capr(
         S = sim$S,
         X = sim$X,
         K = K,
-        weight = rep(1000, sim$n),
         max_iter = 150L,
         tol = 1e-7,
         orth = TRUE

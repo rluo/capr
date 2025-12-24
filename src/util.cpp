@@ -48,6 +48,7 @@ double log_deviation_from_diagonality_cpp(const arma::cube& S_cube,
     arma::log_det(logdet_BTAB, sign, BTAB);
     sum += nval[i] * (logdet_diag - logdet_BTAB);
   }
+  sum = sum / arma::accu(nval);
   return sum;
 }
 
@@ -61,8 +62,8 @@ double cap_loglike_cpp(const arma::cube& S_cube, const arma::mat& X,
   double loglike = 0.0;
   arma::vec XB = X * beta;  // n x 1
   for (size_t i = 0; i < n; ++i) {
-    arma::mat BTAB = gamma.t() * S_cube.slice(i) * gamma;
-    loglike += XB[i] * T[i] + BTAB(0, 0) * std::exp(-XB[i]);
+    double BTAB = arma::as_scalar(gamma.t() * S_cube.slice(i) * gamma);
+    loglike += XB[i] * T[i] + BTAB * std::exp(-XB[i]);
   }
   return loglike;
 }

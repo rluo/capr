@@ -4,12 +4,10 @@
 \alias{simu.capr}
 \title{Simulate covariance matrices compatible with \code{capr()}}
 \usage{
-simu.capr(seed = 123L, p = 5L, n = 120L)
+simu.capr(seed = 123L, n = 120L)
 }
 \arguments{
 \item{seed}{Integer seed used for reproducibility.}
-
-\item{p}{Number of variables (dimension of the covariance matrices).}
 
 \item{n}{Number of observations (slices) to generate.}
 }

@@ -1,5 +1,5 @@
 test_that("capr::single component::no init::orth", {
-    simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+    simu.data <- simu.capr(seed = 123L, n = 120L)
 
 
     fit <- capr(
@@ -32,7 +32,7 @@ test_that("capr::single component::no init::orth", {
 
 
 test_that("capr::single component::no init::no orth", {
-    simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+    simu.data <- simu.capr(seed = 123L, n = 120L)
 
     fit <- capr(
         S = simu.data$S,
@@ -64,7 +64,7 @@ test_that("capr::single component::no init::no orth", {
 
 
 test_that("capr::single component::init::orth", {
-    simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+    simu.data <- simu.capr(seed = 123L, n = 120L)
 
 
     fit <- capr(
@@ -100,7 +100,7 @@ test_that("capr::single component::init::orth", {
 
 
 test_that("capr::single component::init::no orth", {
-    simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+    simu.data <- simu.capr(seed = 123L, n = 120L)
 
 
     fit <- capr(

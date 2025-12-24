@@ -12,8 +12,6 @@
 #' @param X Numeric design matrix with \eqn{n} rows.
 #' @param fit A \code{\link{capr}} fit containing \code{$B} and \code{$Gamma}.
 #' @param nboot Number of bootstrap replicates.
-#' @param weight Optional numeric vector of length \eqn{n} (defaults to the
-#'   weights used during the original fit, or 1).
 #' @param level Confidence level for the returned intervals.
 #' @param max_iter Maximum Newton iterations for solving \eqn{\beta}.
 #' @param tol Convergence tolerance for the Newton solver.
@@ -27,7 +25,7 @@
 #' \item{level}{The requested confidence level.}
 #'
 #' @export
-capr.boot <- function(fit, S, X, nboot = 1000L, weight = NULL,
+capr.boot <- function(fit, S, X, nboot = 1000L,
                       level = 0.95, max_iter = 100L, tol = 1e-6,
                       seed = NULL) {
     if (!inherits(fit, "capr")) {
@@ -58,14 +56,7 @@ capr.boot <- function(fit, S, X, nboot = 1000L, weight = NULL,
         stop("`fit$B` must be a q x K matrix compatible with `X`.", call. = FALSE)
     }
 
-    if (is.null(weight)) {
-        weight <- rep(1, n)
-    } else if (length(weight) != n) {
-        stop("`weight` must have length n.", call. = FALSE)
-    }
-    if (!is.numeric(weight)) {
-        stop("`weight` must be numeric.", call. = FALSE)
-    }
+    weight <- fit$weight
 
 
     beta_all <- array(0, dim = c(q, K, nboot))

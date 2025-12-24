@@ -9,7 +9,6 @@ capr.boot(
   S,
   X,
   nboot = 1000L,
-  weight = NULL,
   level = 0.95,
   max_iter = 100L,
   tol = 1e-06,
@@ -25,9 +24,6 @@ used to fit \code{fit}.}
 \item{X}{Numeric design matrix with \eqn{n} rows.}
 
 \item{nboot}{Number of bootstrap replicates.}
-
-\item{weight}{Optional numeric vector of length \eqn{n} (defaults to the
-weights used during the original fit, or 1).}
 
 \item{level}{Confidence level for the returned intervals.}
 

@@ -5,7 +5,6 @@
 #' build the covariance slices.
 #'
 #' @param seed Integer seed used for reproducibility.
-#' @param p Number of variables (dimension of the covariance matrices).
 #' @param n Number of observations (slices) to generate.
 #'
 #' @return A list with components:
@@ -23,14 +22,15 @@
 #' str(sim$S)
 #'
 #' @export
-simu.capr <- function(seed = 123L, p = 5L, n = 120L) {
-    stopifnot(length(seed) == 1L, length(p) == 1L, length(n) == 1L)
+simu.capr <- function(seed = 123L, n = 120L) {
+    stopifnot(length(seed) == 1L, length(n) == 1L)
     set.seed(as.integer(seed))
 
     BetaMat <- rbind(
         c(5, 4, 1, -1, -2),
         c(0, -1.2, 0.9, 0, 0)
     )
+    p <- ncol(BetaMat)
     if (ncol(BetaMat) != p) {
         stop("BetaMat must have ", p, " columns.", call. = FALSE)
     }

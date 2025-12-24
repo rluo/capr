@@ -96,6 +96,13 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
       best_gamma = gamma;
     }
   }
+
+  if (arma::norm(best_beta, "inf") > 16) {
+    Rcpp::warning(
+        "Large beta values detected; results may be unstable.\nConsider "
+        "rescaling the covariates and changing the initial values.");
+  }
+
   return {std::move(best_beta), std::move(best_gamma), best_loglike};  // NRVO
 }
 

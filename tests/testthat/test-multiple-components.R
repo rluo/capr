@@ -1,5 +1,5 @@
 test_that("capr::multiple components:no init::orth", {
-    sim <- simu.capr(seed = 123L, p = 5L, n = 150L)
+    sim <- simu.capr(seed = 123L, n = 150L)
 
     K <- 2L
 
@@ -33,9 +33,8 @@ test_that("capr::multiple components:no init::orth", {
 })
 
 
-
 test_that("capr::multiple components:init::orth", {
-    sim <- simu.capr(seed = 123L, p = 5L, n = 150L)
+    sim <- simu.capr(seed = 123L, n = 150L)
 
     K <- 2L
 
@@ -78,10 +77,8 @@ test_that("capr::multiple components:init::orth", {
 })
 
 
-
-
 # test_that("capr::multiple components:no init::no orth", {
-#     sim <- simu.capr(seed = 123L, p = 5L, n = 150L)
+#     sim <- simu.capr(seed = 123L,  n = 150L)
 
 #     K <- 2L
 
@@ -115,9 +112,8 @@ test_that("capr::multiple components:init::orth", {
 # })
 
 
-
 test_that("capr::multiple components:init::no orth", {
-    sim <- simu.capr(seed = 123L, p = 5L, n = 150L)
+    sim <- simu.capr(seed = 123L, n = 150L)
 
     K <- 2L
 

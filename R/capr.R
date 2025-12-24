@@ -151,7 +151,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
     rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec)
+    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec, weight = weight)
     class(ret) <- c("capr")
     ret
 }

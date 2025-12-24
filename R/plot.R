@@ -1,13 +1,12 @@
 #' Plot log-deviance from diagonality by component count
 #'
-#' For a fitted CAP regression, plots two diagnostics across the first
+#' For a xted CAP regression, plots two diagnostics across the first
 #' \eqn{K} components: (1) the negative log-likelihood returned by [capr()]
 #' and (2) the log deviation-from-diagonality (DfD) for the loading matrix
 #' formed by the first \eqn{k} directions. Both curves help diagnose how much
 #' is gained by adding components.
 #'
-#' @param fit A `capr` object returned by [capr()].
-#' @param S Numeric 3D array of covariance matrices used to fit `fit`.
+#' @param x A `capr` object returned by [capr()].
 #' @param ... Additional arguments passed to [graphics::plot()] and applied to
 #'   both panels (for example, `pch`, `col`, or axis limits).
 #'
@@ -28,27 +27,28 @@
 #' @examples
 #' \dontrun{
 #' sim <- simu.capr(seed = 123L, n = 120L)
-#' fit <- capr(S = sim$S, K = 3L)
-#' plot(fit, S = sim$S)
+#' x <- capr(S = sim$S, K = 3L)
+#' plot(x, S = sim$S)
 #' }
 #' @method plot capr
 #' @export
-plot.capr <- function(fit, S, ...) {
-    Gamma <- fit$Gamma
-    K <- ncol(fit$Gamma)
-    weight <- fit$weight
+plot.capr <- function(x, ...) {
+    Gamma <- x$Gamma
+    K <- ncol(x$Gamma)
+    weight <- x$weight
     logdfd <- rep(0, K)
+    S <- x$S
     for (k in seq_len(K)) {
         Gamma_k <- Gamma[, 1:k, drop = FALSE]
         logdfd[k] <- log_deviation_from_diagonality(S, weight, Gamma_k)
     }
     # Save current graphics parameters to restore later
-    op <- par(ask = TRUE)
+    op <- graphics::par(ask = TRUE)
     # Ensure parameters are reset when the function exits (good practice)
-    on.exit(par(op))
+    on.exit(graphics::par(op))
     plot(
         x = seq_along(logdfd),
-        y = fit$loglike,
+        y = x$loglike,
         type = "b",
         xlab = "Number of Components",
         ylab = "CAP Neg Log-Likelihood",
@@ -65,6 +65,6 @@ plot.capr <- function(fit, S, ...) {
         ...
     )
 
-    par(op) # Restore original graphics parameters
+    graphics::par(op) # Restore original graphics parameters
     invisible(logdfd)
 }

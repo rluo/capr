@@ -38,7 +38,7 @@ log-likelihood or log-DfD curve.
 \examples{
 \dontrun{
 sim <- simu.capr(seed = 123L, n = 120L)
-fit <- capr(S = sim$S, X = sim$X, K = 3L)
+fit <- capr(S = sim$S, K = 3L)
 plot(fit, S = sim$S)
 }
 }

@@ -48,8 +48,8 @@ for (alg_name in names(fg_algorithms)) {
 
         weights <- rep(1, fixture$M)
         crit_identity <- log_deviation_from_diagonality(fixture$cov_cube, weights, diag(fixture$P))
-        crit_fit <- log_deviation_from_diagonality(fixture$cov_cube, weights, fit)
-        crit_ref <- log_deviation_from_diagonality(fixture$cov_cube, weights, fixture$B_ref)
+        crit_fit <- sum(weights) * log_deviation_from_diagonality(fixture$cov_cube, weights, fit)
+        crit_ref <- sum(weights) * log_deviation_from_diagonality(fixture$cov_cube, weights, fixture$B_ref)
 
         expect_equal(crit_ref, 0.03432332, tolerance = 1e-6)
         expect_lt(crit_fit, crit_identity)

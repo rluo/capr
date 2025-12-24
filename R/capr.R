@@ -31,7 +31,7 @@
 #' defined, the input \code{S} is used as-is at each step.
 #'
 #' @examples
-#' simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+#' simu.data <- simu.capr(seed = 123L, n = 120L)
 #' K <- 2L
 #' fit <- capr(
 #'     S = simu.data$S,
@@ -39,7 +39,6 @@
 #'     K = K
 #' )
 #' print(fit)
-#' @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 #' @export
 capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_iter = 200L, tol = 1e-6, orth = TRUE, n.init = 10L) {
     # ---- type checks ----
@@ -84,8 +83,8 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
         }
     } else {
         if (!is.null(n.init)) {
-            B.init <- array(rnorm(q * K * n.init), dim = c(q, n.init, K))
-            Gamma.init <- array(rnorm(p * K * n.init), dim = c(p, n.init, K))
+            B.init <- array(stats::rnorm(q * K * n.init), dim = c(q, n.init, K))
+            Gamma.init <- array(stats::rnorm(p * K * n.init), dim = c(p, n.init, K))
         } else {
             stop("If `B.init` and `Gamma.init` are not both specified, `n.init` must be provided.", call. = FALSE)
         }
@@ -151,7 +150,7 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
     colnames(Gamma_hat) <- paste0("Comp", seq_len(K))
     rownames(Gamma_hat) <- paste0("V", seq_len(p))
 
-    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec, weight = weight)
+    ret <- list(B = B_hat, Gamma = Gamma_hat, loglike = loglikevec, S = S, weight = weight)
     class(ret) <- c("capr")
     ret
 }

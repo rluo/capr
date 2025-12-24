@@ -41,7 +41,6 @@
 #' FG2(cov_cube, maxit = 5)
 #' }
 #'
-#' @seealso \code{\link{CAP_one_component}}, \code{\link{rank_complete_s}}
 #' @export
 FG <- function(cov_array, P = NULL, M = NULL, maxit = 30L) {
     args <- fg_validate_inputs(cov_array, P, M, maxit)

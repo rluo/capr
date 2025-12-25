@@ -5,24 +5,24 @@
 \alias{FG2}
 \title{Flury-Gautschi Common Principal Components}
 \usage{
-FG(cov_array, P = NULL, M = NULL, maxit = 30L)
+FG(cov_array, p = NULL, m = NULL, maxit = 30L)
 
-FG2(cov_array, P = NULL, M = NULL, maxit = 30L)
+FG2(cov_array, p = NULL, m = NULL, maxit = 30L)
 }
 \arguments{
-\item{cov_array}{Numeric 3D array of shape \eqn{P x P x M}
-containing covariance matrices in its \eqn{M} slices.}
+\item{cov_array}{Numeric 3D array of shape \eqn{p x p x m}
+containing covariance matrices in its \eqn{m} slices.}
 
-\item{P}{Optional integer specifying the matrix dimension; defaults to
+\item{p}{Optional integer specifying the matrix dimension; defaults to
 \code{dim(cov_array)[1]}.}
 
-\item{M}{Optional integer specifying the number of matrices/slices; defaults
+\item{m}{Optional integer specifying the number of matrices/slices; defaults
 to \code{dim(cov_array)[3]}.}
 
 \item{maxit}{Integer scalar; number of outer iterations of the algorithm.}
 }
 \value{
-A \eqn{P x P} numeric matrix of estimated common loadings.
+A \eqn{p x p} numeric matrix of estimated common loadings.
 }
 \description{
 Implements the Flury & Gautschi (1986) iterative algorithm to estimate a
@@ -42,17 +42,17 @@ computation.}
 \examples{
 \dontrun{
 set.seed(1)
-P <- 3
-M <- 4
-mats <- replicate(M,
+p <- 3
+m <- 4
+mats <- replicate(m,
     {
-        A <- matrix(rnorm(P * P), P, P)
+        A <- matrix(rnorm(p * p), p, p)
         crossprod(A)
     },
     simplify = FALSE
 )
-cov_cube <- array(NA_real_, dim = c(P, P, M))
-for (k in 1:M) cov_cube[, , k] <- mats[[k]]
+cov_cube <- array(NA_real_, dim = c(p, p, m))
+for (k in 1:m) cov_cube[, , k] <- mats[[k]]
 FG(cov_cube, maxit = 5)
 FG2(cov_cube, maxit = 5)
 }

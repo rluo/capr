@@ -1,7 +1,7 @@
 fg_example_fixture <- function() {
-    P <- 6L
-    M <- 2L
-    cov_cube <- array(0, dim = c(P, P, M))
+    p <- 6L
+    m <- 2L
+    cov_cube <- array(0, dim = c(p, p, m))
 
     cov_cube[, , 1] <- matrix(c(
         45, 10, 0, 5, 0, 0,
@@ -10,7 +10,7 @@ fg_example_fixture <- function() {
         5, 0, 10, 45, 0, 0,
         0, 0, 0, 0, 16.4, -4.8,
         0, 0, 0, 0, -4.8, 13.6
-    ), P, P, byrow = TRUE)
+    ), p, p, byrow = TRUE)
 
     cov_cube[, , 2] <- matrix(c(
         27.5, -12.5, -0.5, -4.5, -2.04, 3.72,
@@ -19,7 +19,7 @@ fg_example_fixture <- function() {
         -4.5, -0.5, -9.5, 24.5, 3.72, 2.04,
         -2.04, 2.04, -3.72, 3.72, 54.76, -4.68,
         3.72, -3.72, -2.04, 2.04, -4.68, 51.24
-    ), P, P, byrow = TRUE)
+    ), p, p, byrow = TRUE)
 
     B_ref <- matrix(c(
         0.5, -0.5545, 0.5, 0.4281, -0.0956, 0.0083,
@@ -28,9 +28,9 @@ fg_example_fixture <- function() {
         -0.5, 0.4250, 0.5, 0.5623, 0.0541, 0.0169,
         0.0, -0.1265, 0.0, 0.0014, 0.7919, 0.5974,
         0.0, 0.0878, 0.0, -0.0337, -0.5906, 0.8015
-    ), P, P, byrow = TRUE)
+    ), p, p, byrow = TRUE)
 
-    list(P = P, M = M, cov_cube = cov_cube, B_ref = B_ref)
+    list(p = p, m = m, cov_cube = cov_cube, B_ref = B_ref)
 }
 
 fg_algorithms <- list(FG = FG, FG2 = FG2)
@@ -42,12 +42,12 @@ for (alg_name in names(fg_algorithms)) {
 
         fit <- fg_algorithms[[alg_name]](fixture$cov_cube, maxit = 200L)
 
-        expect_equal(dim(fit), c(fixture$P, fixture$P))
+        expect_equal(dim(fit), c(fixture$p, fixture$p))
         expect_true(all(is.finite(fit)))
-        expect_equal(crossprod(fit), diag(fixture$P), tolerance = 1e-6)
+        expect_equal(crossprod(fit), diag(fixture$p), tolerance = 1e-6)
 
-        weights <- rep(1, fixture$M)
-        crit_identity <- log_deviation_from_diagonality(fixture$cov_cube, weights, diag(fixture$P))
+        weights <- rep(1, fixture$m)
+        crit_identity <- log_deviation_from_diagonality(fixture$cov_cube, weights, diag(fixture$p))
         crit_fit <- sum(weights) * log_deviation_from_diagonality(fixture$cov_cube, weights, fit)
         crit_ref <- sum(weights) * log_deviation_from_diagonality(fixture$cov_cube, weights, fixture$B_ref)
 

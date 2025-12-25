@@ -60,9 +60,9 @@ algorithm with optional orthogonalization of successive directions.
 \details{
 For component \eqn{k}, CAP solves
 \deqn{\min_{\beta^{(k)}, \gamma^{(k)}} \frac{1}{2} \sum_{i=1}^{n} (\mathbf{x}_{i}^\top \beta^{(k)}) T_{i}
-+ \frac{1}{2} \sum_{i=1}^{n} \gamma^{(k)\top} S_{i}^{(k)} \gamma^{(k)} \exp(-\mathbf{x}_{i}^\top \beta^{(k)})}
-subject to \deqn{\gamma^{(k)\top} H \gamma^{(k)} = 1} and, for \eqn{k > 1}, \deqn{\Gamma^{(k-1)\top} \gamma^{(k)} = \mathbf{0}}.
-Here \eqn{T_{i}} denotes the weight for slice \eqn{i}, \eqn{S_{i}^{(k)}} is the \eqn{i}-th covariance slice,
++ \frac{1}{2} \sum_{i=1}^{n} \gamma^{(k)\top} S_{i} \gamma^{(k)} \exp(-\mathbf{x}_{i}^\top \beta^{(k)})}
+subject to \deqn{\gamma^{(k)\top} H \gamma^{(k)} = 1} and, for \eqn{k > 1}, \deqn{\Gamma^{(k-1)\top} \gamma^{(k)} = \mathbf{0}.}
+Here \eqn{T_{i}} denotes the weight for slice \eqn{i}, \eqn{S_{i}} is the \eqn{i}-th covariance slice,
 and \eqn{H} is the positive definite matrix used for the orthogonality constraint (see Zhao et al., 2021).
 The algorithm fits \eqn{\gamma^{(k)}} and \eqn{\beta^{(k)}} sequentially with multiple random initializations and
 returns the solution pair that minimizes the negative log-likelihood.
@@ -78,5 +78,5 @@ fit <- capr(
 print(fit)
 }
 \references{
-Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021). Covariate assisted principal regression for covariance matrix outcomes. Biostatistics, 22(3), 629-645.
+Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021). Covariate assisted principal regression for covariance matrix outcomes. \emph{Biostatistics}, 22(3), 629-645.
 }

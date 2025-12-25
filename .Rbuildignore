@@ -13,5 +13,6 @@
 ^README\.html$
 ^README\.md$
 ^NEWS\.md$
+^LICENSE$
 ^.*\.o$
 ^Rplots.pdf$

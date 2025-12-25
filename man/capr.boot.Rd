@@ -27,7 +27,7 @@ capr.boot(
 \item{seed}{Optional integer seed for reproducibility.}
 }
 \value{
-A list with:
+A list of class \code{capr.boot} with:
 \item{beta}{bootstrap average of \eqn{\beta} with dimension \eqn{q \times K}}
 \item{ci_lower, ci_upper}{Matrices \eqn{q \times K} with the lower/upper
 confidence limits.}
@@ -40,4 +40,14 @@ covariance slices \eqn{S[, , i]} with replacement, projects them onto the fixed
 directions to obtain component-specific variances, and re-solves the
 \eqn{\beta^{(k)}} equations. Quantile-based confidence intervals are returned
 for every predictor/component pair.
+}
+\examples{
+simu.data <- simu.capr(seed = 123L, n = 120L)
+K <- 3L
+fit <- capr(
+    S = simu.data$S,
+    X = simu.data$X,
+    K = K
+)
+capr.boot(fit, nboot = 10L, level = 0.95, seed = 42L)
 }

@@ -20,4 +20,4 @@ fit
 
 
 
-plot(fit, simu.data$S)
+plot(fit)

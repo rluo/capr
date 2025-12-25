@@ -30,7 +30,7 @@ cosine_similarity <- function(a, b, eps = 1e-12) {
 #'
 #' @return Numeric scalar value equal to
 #'   \eqn{\sum_i n_i (\log \det \operatorname{diag}(B^\top S_i B)
-#'   - \log \det(B^\top S_i B))}.
+#'   - \log \det(B^\top S_i B)) / (\sum_i n_i)}.
 #' @examples
 #' covs <- array(diag(2), dim = c(2, 2, 1))
 #' log_deviation_from_diagonality(covs, 1, diag(2))

@@ -17,7 +17,7 @@ matrices in its slices.}
 \value{
 Numeric scalar value equal to
 \eqn{\sum_i n_i (\log \det \operatorname{diag}(B^\top S_i B)
-  - \log \det(B^\top S_i B))}.
+  - \log \det(B^\top S_i B)) / (\sum_i n_i)}.
 }
 \description{
 Evaluates the Flury-Gautschi log-deviation criterion for a collection of

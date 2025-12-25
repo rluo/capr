@@ -14,12 +14,20 @@
 #' @param tol Convergence tolerance for the Newton solver.
 #' @param seed Optional integer seed for reproducibility.
 #'
-#' @return A list with:
+#' @return A list of class \code{capr.boot} with:
 #' \item{beta}{bootstrap average of \eqn{\beta} with dimension \eqn{q \times K}}
 #' \item{ci_lower, ci_upper}{Matrices \eqn{q \times K} with the lower/upper
 #'   confidence limits.}
 #' \item{level}{The requested confidence level.}
-#'
+#' @examples
+#' simu.data <- simu.capr(seed = 123L, n = 120L)
+#' K <- 3L
+#' fit <- capr(
+#'     S = simu.data$S,
+#'     X = simu.data$X,
+#'     K = K
+#' )
+#' capr.boot(fit, nboot = 10L, level = 0.95, seed = 42L)
 #' @export
 capr.boot <- function(fit, nboot = 1000L,
                       level = 0.95, max_iter = 100L, tol = 1e-6,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot.R
 \name{plot.capr}
 \alias{plot.capr}
-\title{Plot log-deviance from diagonality by component count}
+\title{Plot deviation diagnostics by component count}
 \usage{
 \method{plot}{capr}(x, ...)
 }
@@ -13,15 +13,15 @@
 both panels (for example, \code{pch}, \code{col}, or axis limits).}
 }
 \value{
-Invisibly returns the numeric vector of log-deviance values (one per
+Invisibly returns the numeric vector of log deviation values (one per
 component).
 }
 \description{
-For a xted CAP regression, plots two diagnostics across the first
+For a fitted CAP regression, plots two diagnostics across the first
 \eqn{K} components: (1) the negative log-likelihood returned by \code{\link[=capr]{capr()}}
 and (2) the log deviation-from-diagonality (DfD) for the loading matrix
-formed by the first \eqn{k} directions. Both curves help diagnose how much
-is gained by adding components.
+formed by the first \eqn{k} directions. Both curves help assess the gain
+from adding components.
 }
 \details{
 The DfD criterion for the first \eqn{k} directions \eqn{\Gamma^{(k)}} is

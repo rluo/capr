@@ -23,7 +23,7 @@ linear-regression style table, showing the estimate for each predictor and
 component.
 }
 \examples{
-simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+simu.data <- simu.capr(seed = 123L, n = 120L)
 K <- 2L
 fit <- capr(
     S = simu.data$S,

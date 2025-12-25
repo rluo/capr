@@ -11,7 +11,7 @@
 #'
 #' @return The input object `x`, invisibly.
 #' @examples
-#' simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+#' simu.data <- simu.capr(seed = 123L, n = 120L)
 #' K <- 2L
 #' fit <- capr(
 #'     S = simu.data$S,
@@ -91,7 +91,7 @@ print.capr <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
 #'
 #' @return The input object `x`, invisibly.
 #' @examples
-#' simu.data <- simu.capr(seed = 123L, p = 5L, n = 120L)
+#' simu.data <- simu.capr(seed = 123L, n = 120L)
 #' K <- 2L
 #' fit <- capr(
 #'     S = simu.data$S,
@@ -99,8 +99,6 @@ print.capr <- function(x, digits = max(3L, getOption("digits") - 3L), ...) {
 #'     K = K
 #' )
 #' fit.boot <- capr.boot(
-#'     S = simu.data$S,
-#'     X = simu.data$X,
 #'     fit = fit,
 #'     nboot = 10L,
 #'     max_iter = 20L,

@@ -14,7 +14,7 @@ Description: Covariate Assisted Principal Regression (CAPR) for multiple
     directions that maximize the log-likelihood of a log-linear regression model
     of the covariates. See Zhao et al. (2021), ``Covariate Assisted Principal
     Regression for Covariance Matrix Outcomes" <doi:10.1093/biostatistics/kxz057>.
-License: GPL-3
+License: GPL-3 | file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
@@ -22,7 +22,8 @@ LinkingTo:
     Rcpp,
     RcppArmadillo
 Imports: 
-    Rcpp
+    Rcpp,
+    MASS
 Suggests:
     testthat,
     roxygen2

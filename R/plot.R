@@ -1,10 +1,10 @@
-#' Plot log-deviance from diagonality by component count
+#' Plot deviation diagnostics by component count
 #'
-#' For a xted CAP regression, plots two diagnostics across the first
+#' For a fitted CAP regression, plots two diagnostics across the first
 #' \eqn{K} components: (1) the negative log-likelihood returned by [capr()]
 #' and (2) the log deviation-from-diagonality (DfD) for the loading matrix
-#' formed by the first \eqn{k} directions. Both curves help diagnose how much
-#' is gained by adding components.
+#' formed by the first \eqn{k} directions. Both curves help assess the gain
+#' from adding components.
 #'
 #' @param x A `capr` object returned by [capr()].
 #' @param ... Additional arguments passed to [graphics::plot()] and applied to
@@ -20,7 +20,7 @@
 #' \eqn{k} is the last point before a sudden jump in the negative
 #' log-likelihood or log-DfD curve.
 #'
-#' @return Invisibly returns the numeric vector of log-deviance values (one per
+#' @return Invisibly returns the numeric vector of log deviation values (one per
 #'   component).
 #'
 #' @seealso [log_deviation_from_diagonality()]

@@ -14,9 +14,9 @@ capr.boot(
 )
 }
 \arguments{
-\item{fit}{A \code{\link{capr}} fit containing \code{$B} and \code{$Gamma}.}
+\item{fit}{A \code{\link{capr}} fit containing components \code{B} and \code{Gamma}.}
 
-\item{nboot}{Number of bootstrap replicates.}
+\item{nboot}{Integer; number of bootstrap replicates.}
 
 \item{level}{Confidence level for the returned intervals.}
 
@@ -28,16 +28,16 @@ capr.boot(
 }
 \value{
 A list with:
-\item{beta}{bootstrap average of beta of dimension \eqn{q \times K} }
+\item{beta}{bootstrap average of \eqn{\beta} with dimension \eqn{q \times K}}
 \item{ci_lower, ci_upper}{Matrices \eqn{q \times K} with the lower/upper
 confidence limits.}
 \item{level}{The requested confidence level.}
 }
 \description{
-Generates bootstrap inference  of the CAP regression coefficients while
+Generates bootstrap inference for the CAP regression coefficients while
 holding the fitted directions \eqn{\Gamma} fixed. Each replicate samples the
-covariance slices \eqn{S[,,i]} with replacement, projects them onto the fixed
+covariance slices \eqn{S[, , i]} with replacement, projects them onto the fixed
 directions to obtain component-specific variances, and re-solves the
-\eqn{\beta^{(k)}} equations. Quantile-based confidence intervals are
-returned for every predictor/component pair.
+\eqn{\beta^{(k)}} equations. Quantile-based confidence intervals are returned
+for every predictor/component pair.
 }

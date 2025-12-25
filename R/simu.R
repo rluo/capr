@@ -7,6 +7,7 @@
 #' @param seed Integer seed used for reproducibility.
 #' @param n Number of observations (slices) to generate.
 #'
+#' @importFrom MASS mvrnorm
 #' @return A list with components:
 #' \item{S}{Array of dimension \eqn{p \times p \times n} holding the simulated
 #'   covariance matrices.}

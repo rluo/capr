@@ -8,10 +8,11 @@ R package for the Covariate Assited Principal Regression [paper](https://doi.org
 ## Current Focus (Version 0.2)
 
 *  Implement core functionality using Armadillo and C++ 17
-   *  [X] Core CAP regression algorithms
+   *  [X] core CAP regression algorithms
+   *  [X] bootstrap 
    *  [X] S3 print and summary mehtods
-   *  [X] 
-   *  
+   *  [X] S3 plot and select the number of components
+   *  [X] the FG algorithm and variant
 
 ## Future Releases
 

@@ -8,5 +8,10 @@
 ^\.\.Rcheck$
 ^\.github$
 ^\.lintr$
-^\.runtest.R$
+^runtest.R$
+^DEVREADME\.md$
+^README\.html$
+^README\.md$
+^NEWS\.md$
+^.*\.o$
 ^Rplots.pdf$

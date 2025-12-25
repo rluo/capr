@@ -18,7 +18,7 @@ capr(
 )
 }
 \arguments{
-\item{S}{Numeric 3D array of size \eqn{p \times p \times n} (stack of covariance matrices).}
+\item{S}{Numeric 3D array of size \eqn{p \times p \times n} (for example, stack of covariance matrices).}
 
 \item{X}{Numeric matrix \eqn{n \times q} (design matrix), created for example by \code{model.matrix}.}
 
@@ -28,7 +28,7 @@ capr(
 
 \item{Gamma.init}{Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian 3D array).}
 
-\item{weight}{Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S_i}.}
+\item{weight}{Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S[,,i]}.}
 
 \item{max_iter}{Integer scalar, max flip–flop iterations per component (default 200).}
 
@@ -39,29 +39,24 @@ capr(
 \item{n.init}{Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are both set properly, n.init is ignored.}
 }
 \value{
-A list with:
+A list in class capr with:
 \item{B}{numeric matrix \eqn{q \times K}, column \eqn{k} stores \eqn{\beta^{(k)}}}
 \item{Gamma}{numeric matrix \eqn{p \times K}, column \eqn{k} stores \eqn{\gamma^{(k)}}}
+\item{loglike}{negative loglikehood, upto constant scaling and shift}
+\item{S}{3D array used for fitting}
+\item{X}{design matrix used for fitting}
+\item{weight}{weight values used for fitting}
 }
 \description{
-Fits (multiple) CAP components sequentially for the
+Fits (multiple) CAP components sequentially for each of the
 principal direction vectors \eqn{\gamma^{(k)}} and corresponding regression coefficients
 \eqn{\beta^{(k)}}, \eqn{k = 1, \dots, K}. Each component is estimated via a flip–flop algorithm,
 with recommended orthogonalization of successive directions.
 }
 \details{
-For \eqn{k = 1, \dots, K}:
-\itemize{
-\item Initialize \eqn{\beta^{(k)}} (zeros) and \eqn{\gamma^{(k)}} (random normal).
-\item If \code{orth = TRUE} and \code{k > 1}, orthogonalize \eqn{\gamma^{(k)}} against previous directions.
-\item Optionally rank-complete the covariance cube \code{S} given previous directions/coefficients
-if a function \code{rank_complete_s()} is available.
-\item Call \code{CAP_one_component()} to update \eqn{\beta^{(k)}} and \eqn{\gamma^{(k)}} until convergence.
-}
-}
-\note{
-Requires \code{CAP_one_component()} to be available. If \code{rank_complete_s()} is not
-defined, the input \code{S} is used as-is at each step.
+The CAP negative log-likelihood is defined as \deqn{  	\underset{\boldsymbol{\beta},\boldsymbol{\gamma}}{\text{minimize}} &&    \frac{1}{2}\sum_{i=1}^{n}(\bx_{i}^\top\boldsymbol{\beta}^{(k)}) \cdot T_{i}  +\frac{1}{2}\sum_{i=1}^{n} \boldsymbol{\gamma}^{(k)\top} \bS_{i}^{(k)} \boldsymbol{\gamma}^{(k)} \cdot \exp(-\bx_{i}^\top\boldsymbol{\beta}^{(k)}) , \nonumber \\
+The algoirhtm fit the \eqn{\gamma} and \eqn{\beta} sequentially with (ranom) multiple  innitializations  and returns the  solution pair that minimizes the negative log-likehood.
+\end{eqnarray}} for each component.
 }
 \examples{
 simu.data <- simu.capr(seed = 123L, n = 120L)
@@ -72,4 +67,7 @@ fit <- capr(
     K = K
 )
 print(fit)
+}
+\references{
+Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021). Covariate assisted principal regression for covariance matrix outcomes. Biostatistics, 22(3), 629-645.
 }

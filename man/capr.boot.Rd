@@ -6,8 +6,6 @@
 \usage{
 capr.boot(
   fit,
-  S,
-  X,
   nboot = 1000L,
   level = 0.95,
   max_iter = 100L,
@@ -17,11 +15,6 @@ capr.boot(
 }
 \arguments{
 \item{fit}{A \code{\link{capr}} fit containing \code{$B} and \code{$Gamma}.}
-
-\item{S}{Numeric array of shape \eqn{p \times p \times n}, matching the data
-used to fit \code{fit}.}
-
-\item{X}{Numeric design matrix with \eqn{n} rows.}
 
 \item{nboot}{Number of bootstrap replicates.}
 
@@ -35,16 +28,15 @@ used to fit \code{fit}.}
 }
 \value{
 A list with:
-\item{samples}{Array of dimension \eqn{q \times K \times nboot} storing the
-bootstrap coefficient estimates.}
+\item{beta}{bootstrap average of beta of dimension \eqn{q \times K} }
 \item{ci_lower, ci_upper}{Matrices \eqn{q \times K} with the lower/upper
 confidence limits.}
 \item{level}{The requested confidence level.}
 }
 \description{
-Generates bootstrap replicates of the CAP regression coefficients while
+Generates bootstrap inference  of the CAP regression coefficients while
 holding the fitted directions \eqn{\Gamma} fixed. Each replicate samples the
-covariance slices \eqn{S_i} with replacement, projects them onto the fixed
+covariance slices \eqn{S[,,i]} with replacement, projects them onto the fixed
 directions to obtain component-specific variances, and re-solves the
 \eqn{\beta^{(k)}} equations. Quantile-based confidence intervals are
 returned for every predictor/component pair.

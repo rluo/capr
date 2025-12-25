@@ -18,45 +18,54 @@ capr(
 )
 }
 \arguments{
-\item{S}{Numeric 3D array of size \eqn{p \times p \times n} (for example, stack of covariance matrices).}
+\item{S}{Numeric 3D array of size \eqn{p \times p \times n} (for example, a stack of covariance matrices).}
 
-\item{X}{Numeric matrix \eqn{n \times q} (design matrix), created for example by \code{model.matrix}.}
+\item{X}{Numeric matrix \eqn{n \times q} (design matrix), created for example by \code{model.matrix()}.}
 
-\item{K}{Integer scalar, number of components (\eqn{K \ge 1}).}
+\item{K}{Integer scalar; number of components (\eqn{K \ge 1}).}
 
-\item{B.init}{Initial value of coefficient \eqn{B \in R^{q \times n.init \times K}} (default zero 3D array).}
+\item{B.init}{Initial value of the coefficient array \eqn{B \in \mathbb{R}^{q \times n.init \times K}}
+(default: zero 3D array).}
 
-\item{Gamma.init}{Initial value of principal direction matrix  \eqn{\Gamma \in  R^{p\times n.init \times K}} (default random Gaussian 3D array).}
+\item{Gamma.init}{Initial value of the principal direction array \eqn{\Gamma \in \mathbb{R}^{p \times n.init \times K}}
+(default: random Gaussian 3D array).}
 
-\item{weight}{Numeric vector of length \eqn{n} (default rep(1, n)), where each element should be proportional the sample size for each \eqn{S[,,i]}.}
+\item{weight}{Numeric vector of length \eqn{n} (default \code{rep(1, n)}); each element should be proportional
+to the sample size for the corresponding slice \eqn{S[, , i]}.}
 
-\item{max_iter}{Integer scalar, max flip–flop iterations per component (default 200).}
+\item{max_iter}{Integer scalar; maximum flip-flop iterations per component (default 200).}
 
-\item{tol}{Positive numeric scalar, convergence tolerance (default 1e-6).}
+\item{tol}{Positive numeric scalar; convergence tolerance (default 1e-6).}
 
-\item{orth}{Logical scalar; if TRUE (default), enforce orthogonality (recommended) of successive \eqn{\gamma}. If FALSE, no orthogonalization is performed with warnings of potential identical components.}
+\item{orth}{Logical scalar; if \code{TRUE} (default), enforce orthogonality of successive \eqn{\gamma^{(k)}}.
+If \code{FALSE}, no orthogonalization is performed (which may yield identical components).}
 
-\item{n.init}{Integer scalar; number of random initializations (default 10). If B.init and Gamma.init are both set properly, n.init is ignored.}
+\item{n.init}{Integer scalar; number of random initializations (default 10). If \code{B.init} and
+\code{Gamma.init} are both supplied, \code{n.init} is ignored.}
 }
 \value{
-A list in class capr with:
-\item{B}{numeric matrix \eqn{q \times K}, column \eqn{k} stores \eqn{\beta^{(k)}}}
-\item{Gamma}{numeric matrix \eqn{p \times K}, column \eqn{k} stores \eqn{\gamma^{(k)}}}
-\item{loglike}{negative loglikehood, upto constant scaling and shift}
+A list of class \code{capr} with:
+\item{B}{numeric matrix \eqn{q \times K} whose \eqn{k}-th column stores \eqn{\beta^{(k)}}}
+\item{Gamma}{numeric matrix \eqn{p \times K} whose \eqn{k}-th column stores \eqn{\gamma^{(k)}}}
+\item{loglike}{negative log-likelihood, up to constant scaling and shift}
 \item{S}{3D array used for fitting}
 \item{X}{design matrix used for fitting}
 \item{weight}{weight values used for fitting}
 }
 \description{
-Fits (multiple) CAP components sequentially for each of the
-principal direction vectors \eqn{\gamma^{(k)}} and corresponding regression coefficients
-\eqn{\beta^{(k)}}, \eqn{k = 1, \dots, K}. Each component is estimated via a flip–flop algorithm,
-with recommended orthogonalization of successive directions.
+Fits CAP components sequentially for principal direction vectors \eqn{\gamma^{(k)}} and regression
+coefficients \eqn{\beta^{(k)}}, \eqn{k = 1, \ldots, K}. Each component is estimated via a flip-flop
+algorithm with optional orthogonalization of successive directions.
 }
 \details{
-The CAP negative log-likelihood is defined as \deqn{  	\underset{\boldsymbol{\beta},\boldsymbol{\gamma}}{\text{minimize}} &&    \frac{1}{2}\sum_{i=1}^{n}(\bx_{i}^\top\boldsymbol{\beta}^{(k)}) \cdot T_{i}  +\frac{1}{2}\sum_{i=1}^{n} \boldsymbol{\gamma}^{(k)\top} \bS_{i}^{(k)} \boldsymbol{\gamma}^{(k)} \cdot \exp(-\bx_{i}^\top\boldsymbol{\beta}^{(k)}) , \nonumber \\
-The algoirhtm fit the \eqn{\gamma} and \eqn{\beta} sequentially with (ranom) multiple  innitializations  and returns the  solution pair that minimizes the negative log-likehood.
-\end{eqnarray}} for each component.
+For component \eqn{k}, CAP solves
+\deqn{\min_{\beta^{(k)}, \gamma^{(k)}} \frac{1}{2} \sum_{i=1}^{n} (\mathbf{x}_{i}^\top \beta^{(k)}) T_{i}
++ \frac{1}{2} \sum_{i=1}^{n} \gamma^{(k)\top} S_{i}^{(k)} \gamma^{(k)} \exp(-\mathbf{x}_{i}^\top \beta^{(k)})}
+subject to \deqn{\gamma^{(k)\top} H \gamma^{(k)} = 1} and, for \eqn{k > 1}, \deqn{\Gamma^{(k-1)\top} \gamma^{(k)} = \mathbf{0}}.
+Here \eqn{T_{i}} denotes the weight for slice \eqn{i}, \eqn{S_{i}^{(k)}} is the \eqn{i}-th covariance slice,
+and \eqn{H} is the positive definite matrix used for the orthogonality constraint (see Zhao et al., 2021).
+The algorithm fits \eqn{\gamma^{(k)}} and \eqn{\beta^{(k)}} sequentially with multiple random initializations and
+returns the solution pair that minimizes the negative log-likelihood.
 }
 \examples{
 simu.data <- simu.capr(seed = 123L, n = 120L)

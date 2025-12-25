@@ -28,7 +28,7 @@ covariance cube, design matrix, and the latent orthogonal directions used to
 build the covariance slices.
 }
 \examples{
-sim <- simu.capr(seed = 10, p = 4, n = 50)
+sim <- simu.capr(seed = 10, n = 50)
 str(sim$S)
 
 }

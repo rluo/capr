@@ -18,7 +18,7 @@
 #' \item{p, n}{The dimension and sample size supplied to the generator.}
 #'
 #' @examples
-#' sim <- simu.capr(seed = 10, p = 4, n = 50)
+#' sim <- simu.capr(seed = 10, n = 50)
 #' str(sim$S)
 #'
 #' @export

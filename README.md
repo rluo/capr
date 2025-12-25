@@ -1,4 +1,5 @@
 # capr
+[![R-CMD-check](https://github.com/rluo/capr/actions/workflows/r.yml/badge.svg)](https://github.com/rluo/capr/actions/workflows/r.yml)
 
 R package for the Covariate Assited Principal Regression [paper](https://doi.org/10.1093/biostatistics/kxz057) using [Armadillo](https://arma.sourceforge.net/).
 

@@ -29,14 +29,18 @@ The DfD criterion for the first \eqn{k} directions \eqn{\Gamma^{(k)}} is
 \left(\prod_{i = 1}^{n}
   \nu\!\left(\Gamma^{(k)\top} S_i \Gamma^{(k)} / T_i\right)^{T_i}
 \right)^{1 / \sum_i T_i},}
-and the curve shows \eqn{\log \text{DfD}(\Gamma^{(k)})}. A common choice for
+where
+\deqn{
+\nu(A)=\frac{\det\{\mathrm{diag}(A)\}}{\det(A)}
+} for a positive definite matrix \eqn{A}.
+The curve shows \eqn{\log \text{DfD}(\Gamma^{(k)})}. A common choice for
 \eqn{k} is the last point before a sudden jump in the negative
 log-likelihood or log-DfD curve.
 }
 \examples{
 \dontrun{
 sim <- simu.capr(seed = 123L, n = 120L)
-fit <- capr(S = sim$S, K = 3L)
+fit <- capr(S = sim$S, X = sim$X, K = 3L)
 plot(fit)
 }
 }

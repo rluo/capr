@@ -2,7 +2,7 @@
 % Please edit documentation in R/capr.R
 \name{capr}
 \alias{capr}
-\title{Covariate Assisted Projection (CAP) Regression}
+\title{Covariate Assisted Principal (CAP) Regression}
 \usage{
 capr(
   S,

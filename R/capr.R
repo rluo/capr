@@ -1,4 +1,4 @@
-#' Covariate Assisted Projection (CAP) Regression
+#' Covariate Assisted Principal (CAP) Regression
 #'
 #' Fits CAP components sequentially for principal direction vectors \eqn{\gamma^{(k)}} and regression
 #' coefficients \eqn{\beta^{(k)}}, \eqn{k = 1, \ldots, K}. Each component is estimated via a flip-flop

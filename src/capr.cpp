@@ -1,5 +1,5 @@
-// [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
 
 #include <algorithm>
 #include <functional>

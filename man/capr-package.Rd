@@ -7,6 +7,14 @@
 \description{
 Infrastructure for Covariate Assisted Principal Regression.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/rluo/capr}
+  \item Report bugs at \url{https://github.com/rluo/capr/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Xi Luo \email{xi.rossi.luo@gmail.com}
 

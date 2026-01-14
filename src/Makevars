@@ -1,7 +1,7 @@
 CXX_STD = CXX17
 
 ## Dev mode
-# PKG_CXXFLAGS += -Wall -fno-omit-frame-pointer  
+# PKG_CXXFLAGS += -Wall  
 
 ## debugging mode
 # PKG_CPPFLAGS += -DDEBUG=1

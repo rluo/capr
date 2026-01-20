@@ -38,7 +38,6 @@ Two solvers are exported:
 }
 }
 \examples{
-\dontrun{
 set.seed(1)
 p <- 3
 m <- 4
@@ -53,19 +52,18 @@ cov_cube <- array(NA_real_, dim = c(p, p, m))
 for (k in 1:m) cov_cube[, , k] <- mats[[k]]
 FG(cov_cube, maxit = 5)
 FG2(cov_cube, maxit = 5)
-}
 
 }
 \references{
-Flury, B. N. (1984). Common principal components in k groups.
+Flury, B. N. (1984). "Common Principal Components in k Groups."
 \emph{Journal of the American Statistical Association}, 79, 892-898.
 
-Flury, B. N., & Gautschi, W. (1986). An algorithm for simultaneous
-orthogonal transformation of several positive definite symmetric matrices
-to nearly diagonal form. \emph{SIAM Journal on Scientific and Statistical
+Flury, B. N., & Gautschi, W. (1986). "An Algorithm for Simultaneous
+Orthogonal Transformation of Several Positive Definite Symmetric Matrices
+to Nearly Diagonal Form." \emph{SIAM Journal on Scientific and Statistical
 Computing}, 7(1), 169-184.
 
 Eslami, A., Qannari, E. M., Kohler, A., & Bougeard, S. (2013).
-General overview of methods of analysis of multi-group datasets.
+"General Overview of Methods of Analysis of Multi-Group Datasets."
 \emph{Revue des Nouvelles Technologies de l'Information}, 25, 108-123.
 }

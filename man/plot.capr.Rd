@@ -38,11 +38,10 @@ The curve shows \eqn{\log \text{DfD}(\Gamma^{(k)})}. A common choice for
 log-likelihood or log-DfD curve.
 }
 \examples{
-\dontrun{
 sim <- simu.capr(seed = 123L, n = 120L)
 fit <- capr(S = sim$S, X = sim$X, K = 3L)
 plot(fit)
-}
+
 }
 \seealso{
 \code{\link[=log_deviation_from_diagonality]{log_deviation_from_diagonality()}}

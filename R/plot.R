@@ -29,11 +29,10 @@
 #'
 #' @seealso [log_deviation_from_diagonality()]
 #' @examples
-#' \dontrun{
 #' sim <- simu.capr(seed = 123L, n = 120L)
 #' fit <- capr(S = sim$S, X = sim$X, K = 3L)
 #' plot(fit)
-#' }
+#'
 #' @method plot capr
 #' @export
 plot.capr <- function(x, ...) {

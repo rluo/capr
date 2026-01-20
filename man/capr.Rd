@@ -78,5 +78,7 @@ fit <- capr(
 print(fit)
 }
 \references{
-Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021). Covariate assisted principal regression for covariance matrix outcomes. \emph{Biostatistics}, 22(3), 629-645.
+Zhao, Y., Wang, B., Mostofsky, S. H., Caffo, B. S., & Luo, X. (2021).
+"Covariate assisted principal regression for covariance matrix outcomes."
+\emph{Biostatistics}, 22(3), 629-645.
 }

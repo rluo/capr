@@ -17,9 +17,20 @@ static arma::vec solve_gamma_unconstrained(const arma::mat& A,
                                            const arma::mat& H) {
   // --- spectral square-root of H  ----------------------------------------
   arma::mat Hsym = make_symmetric(H);
+  if (!Hsym.is_finite()) {
+    Rcpp::stop("solve_gamma_unconstrained: H contains non-finite values.");
+  }
   arma::vec hval;
   arma::mat Hevec;
-  arma::eig_sym(hval, Hevec, Hsym, "std");  // H = V Λ Vᵀ  (Λ>0)
+  const bool ok_h = arma::eig_sym(hval, Hevec, Hsym, "std");  // H = V Λ Vᵀ
+  if (!ok_h || Hevec.n_cols == 0) {
+    Rcpp::stop("solve_gamma_unconstrained: eig_sym failed for H.");
+  }
+  if (arma::any(hval <= 0.0)) {
+    Rcpp::stop(
+        "solve_gamma_unconstrained: H is not positive definite (non-positive "
+        "eigenvalue detected).");
+  }
 
   arma::mat H_half = Hevec * arma::diagmat(arma::sqrt(hval)) * Hevec.t();
   arma::mat H_invhalf =
@@ -28,9 +39,15 @@ static arma::vec solve_gamma_unconstrained(const arma::mat& A,
   // --- ordinary eigenproblem  B ν = λ ν  ---------------------------------
   arma::mat Asym = make_symmetric(A);
   arma::mat B = make_symmetric(H_invhalf * Asym * H_invhalf);  // B symmetric
+  if (!B.is_finite()) {
+    Rcpp::stop("solve_gamma_unconstrained: transformed matrix B is non-finite.");
+  }
   arma::vec lam;
   arma::mat V;
-  arma::eig_sym(lam, V, B);     // ascending eigenvalues
+  const bool ok_b = arma::eig_sym(lam, V, B, "std");  // ascending eigenvalues
+  if (!ok_b || V.n_cols == 0) {
+    Rcpp::stop("solve_gamma_unconstrained: eig_sym failed for transformed matrix B.");
+  }
   arma::vec nu_min = V.col(0);  // ν with smallest λ
 
   // --- transform back   γ = H⁻½ ν   and normalise  γᵀHγ = 1  --------------
@@ -63,9 +80,20 @@ static arma::vec solve_gamma(
   //  Case 2  :  orthogonality w.r.t. Γ_prev  (same code as before)
   // -------------------------------------------------------------------------
   arma::mat Hsym = make_symmetric(H);
+  if (!Hsym.is_finite()) {
+    Rcpp::stop("solve_gamma: H contains non-finite values.");
+  }
   arma::vec eval;
   arma::mat evec;
-  arma::eig_sym(eval, evec, Hsym, "std");  // H = V Λ Vᵀ
+  const bool ok_h = arma::eig_sym(eval, evec, Hsym, "std");  // H = V Λ Vᵀ
+  if (!ok_h || evec.n_cols == 0) {
+    Rcpp::stop("solve_gamma: eig_sym failed for H.");
+  }
+  if (arma::any(eval <= 0.0)) {
+    Rcpp::stop(
+        "solve_gamma: H is not positive definite (non-positive eigenvalue "
+        "detected).");
+  }
 
   arma::mat H_half = evec * arma::diagmat(arma::sqrt(eval)) * evec.t();
   arma::mat H_invhalf = evec * arma::diagmat(1.0 / arma::sqrt(eval)) * evec.t();
@@ -73,13 +101,27 @@ static arma::vec solve_gamma(
   arma::mat Asym = make_symmetric(A);
   arma::mat B = make_symmetric(H_invhalf * Asym * H_invhalf);  // H⁻½ A H⁻½
   arma::mat U = H_invhalf * Gamma_prev;                        // p × (k-1)
+  if (!B.is_finite() || !U.is_finite()) {
+    Rcpp::stop("solve_gamma: transformed matrices contain non-finite values.");
+  }
 
   arma::mat Q = arma::null(U.t());  // p × (p-k+1)
 
   arma::mat Bred = make_symmetric(Q.t() * B * Q);  // reduced matrix
+  if (Bred.n_rows == 0 || Bred.n_cols == 0) {
+    Rcpp::stop("solve_gamma: no feasible direction left under orthogonality constraints.");
+  }
+  if (!Bred.is_finite()) {
+    Rcpp::stop("solve_gamma: reduced matrix Bred contains non-finite values.");
+  }
   arma::vec lam;
   arma::mat Z;
-  arma::eig_sym(lam, Z, Bred, "std");
+  const bool ok_bred = arma::eig_sym(lam, Z, Bred, "std");
+  if (!ok_bred || Z.n_cols == 0) {
+    Rcpp::stop(
+        "solve_gamma: eig_sym failed for reduced matrix Bred (likely non-symmetric "
+        "or ill-conditioned input).");
+  }
   arma::vec z_min = Z.col(0);  // smallest eigen-pair
 
   arma::vec gamma = H_invhalf * Q * z_min;

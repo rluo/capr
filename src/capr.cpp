@@ -28,6 +28,11 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
                                         int max_iter = 200, double tol = 1e-6) {
   //  matrix  with columns β and γ, for m different initializations
   int max_inits = beta_init.n_cols;
+  if (max_inits < 1 || gamma_init.n_cols < 1) {
+    Rcpp::stop(
+        "`B.init` and `Gamma.init` must have at least one initialization "
+        "column.");
+  }
 
   arma::mat gamma_work = gamma_init;  // copy, so we can normalise columns
 
@@ -154,6 +159,10 @@ Rcpp::List CAP_multi_components(
   // Binit and Gammainit are  variable x  initializations x components
   const arma::uword p = S.n_rows;
   const arma::uword q = X.n_cols;
+  if (Binit.n_slices < static_cast<arma::uword>(K) ||
+      Gammainit.n_slices < static_cast<arma::uword>(K)) {
+    Rcpp::stop("`B.init` and `Gamma.init` must have third dimension >= K.");
+  }
 
   arma::mat Gamma(p, K, arma::fill::zeros);  // p × K
   arma::mat B(q, K, arma::fill::zeros);      // q × K

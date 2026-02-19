@@ -81,10 +81,11 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
 
     ## check if B.init and Gamma.init are properly specified
     if (!is.null(B.init) && !is.null(Gamma.init)) {
-        if (is.numeric(B.init) && is.numeric(Gamma.init) && dim(B.init)[3L] == dim(Gamma.init)[3L] &&
-            dim(B.init)[2L] == dim(Gamma.init)[2L]) {
+        if (is.array(B.init) && is.array(Gamma.init) && length(dim(B.init)) == 3L &&
+            length(dim(Gamma.init)) == 3L && is.numeric(B.init) && is.numeric(Gamma.init) &&
+            dim(B.init)[3L] == dim(Gamma.init)[3L] && dim(B.init)[2L] == dim(Gamma.init)[2L]) {
             n.init <- dim(B.init)[2L]
-            if (length(B.init) != q * n.init * K || length(Gamma.init) != p * n.init * K) {
+            if (n.init < 1L || length(B.init) != q * n.init * K || length(Gamma.init) != p * n.init * K) {
                 stop("If both `B.init` and `Gamma.init` are specified, they must be numeric arrays of shape (q x n.init x K) and (p x n.init x K), respectively.", call. = FALSE)
             }
             B.init <- array(B.init, dim = c(q, n.init, K))
@@ -94,6 +95,11 @@ capr <- function(S, X, K, B.init = NULL, Gamma.init = NULL, weight = NULL, max_i
         }
     } else {
         if (!is.null(n.init)) {
+            if (length(n.init) != 1L || !is.numeric(n.init) || is.na(n.init) ||
+                n.init < 1 || n.init != as.integer(n.init)) {
+                stop("`n.init` must be a single positive integer (>= 1).", call. = FALSE)
+            }
+            n.init <- as.integer(n.init)
             B.init <- array(stats::rnorm(q * K * n.init), dim = c(q, n.init, K))
             Gamma.init <- array(stats::rnorm(p * K * n.init), dim = c(p, n.init, K))
         } else {

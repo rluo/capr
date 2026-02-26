@@ -1,6 +1,6 @@
 Package: capr
 Title: Covariate Assisted Principal Regression
-Version: 0.2.0
+Version: 0.3.0
 Author: Xi Luo [aut, cre], Yi Zhao [aut], Brian Caffo [aut]
 Maintainer: Xi Luo <xi.rossi.luo@gmail.com>
 Authors@R: 

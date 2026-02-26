@@ -2,6 +2,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <optional>
 
@@ -16,6 +17,23 @@ struct CAPResult {
   arma::vec gamma;
   double loglike;
 };
+
+inline void clamp_beta_inplace(arma::vec& beta) {
+  constexpr double kBetaMin = -5.0;
+  constexpr double kBetaMax = 5.0;
+  beta.transform([kBetaMin, kBetaMax](double v) {
+    if (!std::isfinite(v)) return 0.0;
+    return std::clamp(v, kBetaMin, kBetaMax);
+  });
+}
+
+inline void clamp_beta_matrix_inplace(arma::mat& beta_mat) {
+  for (arma::uword j = 0; j < beta_mat.n_cols; ++j) {
+    arma::vec col = beta_mat.col(j);
+    clamp_beta_inplace(col);
+    beta_mat.col(j) = col;
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 //   One CAP component – flip-flop,    returning  CAPResult
@@ -35,9 +53,11 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
   }
 
   arma::mat gamma_work = gamma_init;  // copy, so we can normalise columns
+  arma::mat beta_work = beta_init;
+  clamp_beta_matrix_inplace(beta_work);
 
   arma::vec best_gamma = gamma_init.col(0) * 0;
-  arma::vec best_beta = beta_init.col(0) * 0;
+  arma::vec best_beta = beta_work.col(0) * 0;
   double best_loglike = arma::datum::inf;
 
   const arma::uword p = S.n_rows, n = S.n_slices;
@@ -69,13 +89,14 @@ static CAPResult CAP_one_component_core(const arma::cube& S, const arma::mat& X,
       opt_Gamma_prev && opt_Gamma_prev->get().n_cols > 0;
 
   for (int itinit = 0; itinit < max_inits; ++itinit) {
-    arma::vec beta = beta_init.col(itinit);
+    arma::vec beta = beta_work.col(itinit);
     arma::vec gamma = gamma_work.col(itinit);
 
     for (int it = 0; it < max_iter; ++it) {
       arma::vec beta_old = beta, gamma_old = gamma;
 
       beta = newton_beta(S, X, T, beta, gamma, 10, tol);
+      clamp_beta_inplace(beta);
 
       // build A(β)
       arma::mat A(p, p, arma::fill::zeros);
@@ -171,6 +192,7 @@ Rcpp::List CAP_multi_components(
   for (int k = 0; k < K; ++k) {
     arma::mat beta_k = Binit.slice(k);       // q x m
     arma::mat gamma_k = Gammainit.slice(k);  // p x m
+    clamp_beta_matrix_inplace(beta_k);
 
     arma::cube S_current = S;
     OptGamma gamma_prev_opt = std::nullopt;
